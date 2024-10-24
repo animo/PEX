@@ -351,6 +351,9 @@
                 "type": "string"
               }
             },
+            "optional": {
+              "type": "boolean"
+            },
             "purpose": {
               "type": "string"
             },
@@ -379,6 +382,9 @@
               "items": {
                 "type": "string"
               }
+            },
+            "optional": {
+              "type": "boolean"
             },
             "purpose": {
               "type": "string"

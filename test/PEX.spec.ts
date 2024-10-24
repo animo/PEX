@@ -769,6 +769,19 @@ describe('evaluate', () => {
     expect(result).toEqual([{ message: 'ok', status: 'info', tag: 'root' }]);
   });
 
+  it.only('allows optional value in field definition', () => {
+    const pdSchema: PresentationDefinitionV2 = getFileAsJson('./test/resources/pd_optional_values.json').presentation_definition;
+    const result = PEXv2.validateDefinition(pdSchema);
+
+    expect(result).toEqual([
+      {
+        tag: 'root',
+        status: 'info',
+        message: 'ok',
+      },
+    ]);
+  });
+
   it('correct handles presentation definition with const values in filter', () => {
     const pdSchema: PresentationDefinitionV2 = getFileAsJson('./test/resources/pd_const_values.json').presentation_definition;
     const result = PEXv2.validateDefinition(pdSchema);
