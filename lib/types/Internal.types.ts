@@ -92,8 +92,8 @@ export class InternalPresentationDefinitionV2 implements PresentationDefinitionV
 export interface DiscoveredVersion {
   version?: PEVersion;
   error?: string;
-  v1Errors?: any
-  v2Errors?: any
+  v1Errors?: Record<string, unknown>;
+  v2Errors?: Record<string, unknown>;
 }
 
 export type IPresentationDefinition = PresentationDefinitionV1 | PresentationDefinitionV2;
