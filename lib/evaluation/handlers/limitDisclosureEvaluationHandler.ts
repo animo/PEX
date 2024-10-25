@@ -150,12 +150,8 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
         return;
       }
 
-      // For objects, process each property
+      // For objects, process each child property
       Object.entries(obj).forEach(([key, value]) => {
-        // Skip special SD-JWT properties
-        if (key === '_sd' || key === '_sd_alg') {
-          return;
-        }
         processNestedObject(value, [...currentPath, key], basePath);
       });
     };
