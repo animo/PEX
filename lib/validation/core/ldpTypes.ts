@@ -4,6 +4,7 @@ export class LdpTypes {
     return [
       'Ed25519VerificationKey2018',
       'Ed25519Signature2018',
+      'Ed25519Signature2020',
       'RsaSignature2018',
       'EcdsaSecp256k1Signature2019',
       'EcdsaSecp256k1RecoverySignature2020',

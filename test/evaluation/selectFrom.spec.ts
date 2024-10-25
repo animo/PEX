@@ -1029,8 +1029,7 @@ describe('selectFrom tests', () => {
     pex.evaluateCredentials(pd, result.verifiableCredential!);
     const presentationResult = pex.presentationFrom(pd, result.verifiableCredential!);
     const cred = await SDJwt.fromEncode(presentationResult.presentations[1].compactSdJwtVc, hasher);
-    const claims = await cred.getClaims(hasher);
-    console.log(claims);
+    await cred.getClaims(hasher);
     expect(presentationResult).toBeDefined();
     // TODO finish test
   });
