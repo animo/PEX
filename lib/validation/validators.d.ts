@@ -1,5 +1,8 @@
+import { PresentationDefinitionV1, PresentationDefinitionV2 } from '@sphereon/pex-models';
+
 export interface ValidateFunction {
   (data: unknown): boolean;
+
   errors?: ValidationError[];
 }
 
@@ -27,27 +30,6 @@ export type ValidationParentSchema = {
   };
 };
 
-export type ValidationData = {
-  id?: string;
-  name?: string;
-  purpose?: string;
-  constraints?: {
-    limit_disclosure?: string;
-    fields?: Array<{
-      path?: string[];
-      purpose?: string;
-      filter?: {
-        type?: string;
-        pattern?: string;
-      };
-    }>;
-  };
-  schema?: Array<{
-    uri?: string;
-  }>;
-  [key: string]: unknown;
-};
-
 export type ValidationError = {
   instancePath: string;
   schemaPath: string;
@@ -67,5 +49,5 @@ export type ValidationError = {
   message: string;
   schema: boolean | ValidationParentSchema;
   parentSchema: ValidationParentSchema;
-  data: ValidationData;
+  data: PresentationDefinitionV1 | PresentationDefinitionV2;
 };
