@@ -47,7 +47,9 @@ export class DIDRestrictionEvaluationHandler extends AbstractEvaluationHandler {
       if (typeof wrappedVc.decoded === 'object' && wrappedVc.decoded.iss !== undefined) {
         return wrappedVc.decoded.iss;
       }
-      throw new Error('cannot get issuer from the supplied mdoc credential');
+      // FIXME:
+      return 'hello'
+      // throw new Error('cannot get issuer from the supplied mdoc credential');
     }
     throw new Error('Unsupported credential type');
   }
