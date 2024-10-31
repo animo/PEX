@@ -54,7 +54,7 @@ interface SubmissionSatisfiesDefinitionResult {
   /**
    * Only populated if submission requirements are present
    */
-  submisisonRequirementResults?: SubmissionSatisfiesSubmissionRequirementResult[];
+  submissionRequirementResults?: SubmissionSatisfiesSubmissionRequirementResult[];
 }
 
 export class EvaluationClientWrapper {
@@ -432,7 +432,7 @@ export class EvaluationClientWrapper {
         : Array.isArray(wvps);
 
     if (this._client.generatePresentationSubmission && result.value && useExternalSubmission) {
-      // we map the descriptors of the generated submisison to take into account the nexted values
+      // we map the descriptors of the generated submission to take into account the nexted values
       result.value.descriptor_map = result.value.descriptor_map.map((descriptor) => {
         const [wvcResult] = JsonPathUtils.extractInputField(allWvcs, [descriptor.path]) as Array<{
           value: WrappedVerifiableCredential;
@@ -818,7 +818,7 @@ export class EvaluationClientWrapper {
 
       result.totalRequiredMatches = pd.submission_requirements.length;
       result.totalMatches = submissionRequirementResults.filter((r) => r.isSubmissionRequirementSatisfied).length;
-      result.submisisonRequirementResults = submissionRequirementResults;
+      result.submissionRequirementResults = submissionRequirementResults;
 
       if (result.totalMatches !== result.totalRequiredMatches) {
         result.error = `Expected all submission requirements (${result.totalRequiredMatches}) to be satisfied in submission, but found ${result.totalMatches}.`;
