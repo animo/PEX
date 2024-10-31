@@ -634,7 +634,7 @@ export class EvaluationClientWrapper {
 
           vc = extractionResult.wvc;
           vcPath += ` with nested credential ${descriptor.path_nested.path}`;
-        } else if (descriptor.format === 'vc+sd-jwt') {
+        } else if (descriptor.format === 'vc+sd-jwt' || descriptor.format === 'mso_mdoc') {
           if (!vp.vcs || !vp.vcs.length) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({

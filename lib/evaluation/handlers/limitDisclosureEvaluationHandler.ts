@@ -37,7 +37,8 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
     wvc: WrappedVerifiableCredential,
     vcIndex: number,
   ): boolean {
-    if (wvc.format === 'vc+sd-jwt') return true;
+    if (wvc.format === 'vc+sd-jwt' || wvc.format === 'mso_mdoc') return true;
+    if (wvc.format === 'ldp' || wvc.format === 'jwt') return false;
 
     const limitDisclosureSignatures = this.client.limitDisclosureSignatureSuites;
     const decoded = wvc.decoded as IVerifiableCredential;
@@ -109,7 +110,11 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
           this.createSuccessResult(inputDescriptorIndex, `$[${vcIndex}]`, inputDescriptor.constraints?.limit_disclosure);
         }
       }
-    } else if (CredentialMapper.isW3cCredential(wvc.credential)) {
+    } else if (CredentialMapper.isWrappedMdocCredential(wvc)) {
+      for (const { inputDescriptorIndex, inputDescriptor } of eligibleInputDescriptors) {
+        this.createSuccessResult(inputDescriptorIndex, `$[${vcIndex}]`, inputDescriptor.constraints?.limit_disclosure);
+      }
+    } else if (CredentialMapper.isWrappedW3CVerifiableCredential(wvc)) {
       const internalCredentialToSend = this.createVcWithRequiredFields(eligibleInputDescriptors, wvc.credential, vcIndex);
       /* When verifiableCredentialToSend is null/undefined an error is raised, the credential will
        * remain untouched and the verifiable credential won't be submitted.
@@ -121,7 +126,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
         }
       }
     } else {
-      throw new Error(`Unsupported format for selective disclosure ${wvc.format}`);
+      throw new Error('Unsupported format for selective disclosure');
     }
   }
 
