@@ -8,7 +8,6 @@
   "typings": "dist/main/index.d.ts",
   "repository": "https://github.com/Sphereon-Opensource/pex.git",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@8.15.9+sha256.daa27a0b541bc635323ff96c2ded995467ff9fe6d69ff67021558aa9ad9dcc36",
   "keywords": [
     "SSI",
     "Presentation Exchange",
@@ -88,5 +87,6 @@
   "prettier": {
     "singleQuote": true,
     "printWidth": 150
-  }
+  },
+  "packageManager": "pnpm@9.4.0+sha256.b6fd0bfda555e7e584ad7e56b30c68b01d5a04f9ee93989f4b93ca8473c49c74"
 }
