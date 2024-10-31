@@ -43,13 +43,10 @@ export class DIDRestrictionEvaluationHandler extends AbstractEvaluationHandler {
       return typeof wrappedVc.credential.issuer === 'object' ? wrappedVc.credential.issuer.id : wrappedVc.credential.issuer;
     } else if (CredentialMapper.isSdJwtDecodedCredential(wrappedVc.credential)) {
       return wrappedVc.credential.decodedPayload.iss;
-    } else if (CredentialMapper.isWrappedMdocCredential(wrappedVc)) {
-      if (typeof wrappedVc.decoded === 'object' && wrappedVc.decoded.iss !== undefined) {
-        return wrappedVc.decoded.iss;
-      }
-      // FIXME:
-      return 'hello'
-      // throw new Error('cannot get issuer from the supplied mdoc credential');
+    }
+    // mdoc is not bound to did
+    else if (CredentialMapper.isWrappedMdocCredential(wrappedVc)) {
+      return undefined;
     }
     throw new Error('Unsupported credential type');
   }

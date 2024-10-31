@@ -296,7 +296,7 @@ describe('evaluate', () => {
     // Expect the KB-JWT to be appended
     expect(presentationResult.verifiablePresentations[0]).toEqual(decodedSdJwtVcWithDisclosuresRemoved.compactSdJwtVc + kbJwt);
 
-    const evaluateResults = pex.evaluatePresentation(presentationDefinition, presentationResult.verifiablePresentations, {
+    const evaluateResults = pex.evaluatePresentation(presentationDefinition, presentationResult.verifiablePresentations[0], {
       presentationSubmission: presentationResult.presentationSubmission,
     });
 

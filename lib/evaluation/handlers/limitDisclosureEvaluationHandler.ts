@@ -38,6 +38,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
     vcIndex: number,
   ): boolean {
     if (wvc.format === 'vc+sd-jwt' || wvc.format === 'mso_mdoc') return true;
+    if (wvc.format === 'ldp' || wvc.format === 'jwt') return false;
 
     const limitDisclosureSignatures = this.client.limitDisclosureSignatureSuites;
     const decoded = wvc.decoded as IVerifiableCredential;
@@ -125,7 +126,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
         }
       }
     } else {
-      throw new Error(`Unsupported format for selective disclosure ${(wvc as any).format}`);
+      throw new Error('Unsupported format for selective disclosure');
     }
   }
 
