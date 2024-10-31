@@ -136,7 +136,7 @@ describe('evaluate mdoc', () => {
   it('evaluatePresentation with mso_mdoc format', async () => {
     const presentationDefinition = getPresentationDefinitionV2();
     const submission = {
-      definition_id: '32f54163-7166-48f1-93d8-ff217bdb0653',
+      definition_id: presentationDefinition.id,
       descriptor_map: [
         {
           format: 'mso_mdoc',
@@ -162,7 +162,7 @@ describe('evaluate mdoc', () => {
   it('evaluatePresentation with both mso_mdoc and vc+sd-jwt format', async () => {
     const presentationDefinition = getPresentationDefinitionV2(true);
     const submission = {
-      definition_id: '32f54163-7166-48f1-93d8-ff217bdb0653',
+      definition_id: presentationDefinition.id,
       descriptor_map: [
         {
           format: 'mso_mdoc',
