@@ -24,8 +24,8 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1
       '@sphereon/ssi-types':
-        specifier: file:/Users/timo/Developer/Work/Projects/Animo/Sphereon/ssi-sdk/packages/ssi-types
-        version: file:../ssi-sdk/packages/ssi-types
+        specifier: 0.30.2-next.129
+        version: 0.30.2-next.129
       ajv:
         specifier: ^8.12.0
         version: 8.12.0
@@ -467,13 +467,12 @@ packages:
 
   '@sphereon/kmp-mdl-mdoc@0.2.0-SNAPSHOT.22':
     resolution: {integrity: sha512-uAZZExVy+ug9JLircejWa5eLtAZ7bnBP6xb7DO2+86LRsHNLh2k2jMWJYxp+iWtGHTsh6RYsZl14ScQLvjiQ/A==}
-    bundledDependencies: []
 
   '@sphereon/pex-models@2.3.1':
     resolution: {integrity: sha512-SByU4cJ0XYA6VZQ/L6lsSiRcFtBPHbFioCeQ4GP7/W/jQ+PSBD7uK2oTnKQ9/0iEiMK/6JYqhKgLs4a9UX3UTQ==}
 
-  '@sphereon/ssi-types@file:../ssi-sdk/packages/ssi-types':
-    resolution: {directory: ../ssi-sdk/packages/ssi-types, type: directory}
+  '@sphereon/ssi-types@0.30.2-next.129':
+    resolution: {integrity: sha512-F1TDy9S5ajDJDp21cINXseGSux9kGA+x0KScAS+5+B/RdMGRp7bLOM+3YpQw1QGPqKxVc7JAd2gAn7AI0pAkZA==}
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
@@ -2985,7 +2984,7 @@ snapshots:
 
   '@sphereon/pex-models@2.3.1': {}
 
-  '@sphereon/ssi-types@file:../ssi-sdk/packages/ssi-types':
+  '@sphereon/ssi-types@0.30.2-next.129':
     dependencies:
       '@sd-jwt/decode': 0.7.2
       '@sphereon/kmp-mdl-mdoc': 0.2.0-SNAPSHOT.22
