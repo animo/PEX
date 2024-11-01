@@ -7,6 +7,7 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
   SdJwtDecodedVerifiableCredential,
+  WrappedMdocCredential,
   WrappedVerifiableCredential,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types';
@@ -645,7 +646,7 @@ export class EvaluationClientWrapper {
 
           vc = extractionResult.wvc;
           vcPath += ` with nested credential ${descriptor.path_nested.path}`;
-        } else if (descriptor.format === 'vc+sd-jwt' || descriptor.format === 'mso_mdoc') {
+        } else if (descriptor.format === 'vc+sd-jwt') {
           if (!matchingVp.vcs || !matchingVp.vcs.length) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({
@@ -656,6 +657,25 @@ export class EvaluationClientWrapper {
             continue;
           }
           vc = matchingVp.vcs[0];
+        } else if (descriptor.format === 'mso_mdoc') {
+          // We already know the format is mso_mdoc so this cast is safe
+          const vcs = matchingVp.vcs as WrappedMdocCredential[]
+          vcPath += ` with nested mdoc with doctype ${descriptor.id}`;
+
+          const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType.asStr);
+          
+          if (!matchingVc) {
+            const allDoctypes = vcs.map(vc => `'${vc.credential.docType.asStr}'`).join(', ')
+            result.areRequiredCredentialsPresent = Status.ERROR;
+            result.errors?.push({
+              status: Status.ERROR,
+              tag: 'NoCredentialsFound',
+              message: `No mdoc credential with doctype '${descriptor.id}' found in mdoc vp. Available documents are ${allDoctypes}`,
+            });
+            continue;
+          }
+
+          vc = matchingVc
         } else {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
