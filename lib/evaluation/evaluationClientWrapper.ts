@@ -661,13 +661,13 @@ export class EvaluationClientWrapper {
           vc = matchingVp.vcs[0];
         } else if (descriptor.format === 'mso_mdoc') {
           // We already know the format is mso_mdoc so this cast is safe
-          const vcs = matchingVp.vcs as WrappedMdocCredential[]
+          const vcs = matchingVp.vcs as WrappedMdocCredential[];
           vcPath += ` with nested mdoc with doctype ${descriptor.id}`;
 
           const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType.asStr);
-          
+
           if (!matchingVc) {
-            const allDoctypes = vcs.map(vc => `'${vc.credential.docType.asStr}'`).join(', ')
+            const allDoctypes = vcs.map((vc) => `'${vc.credential.docType.asStr}'`).join(', ');
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({
               status: Status.ERROR,
@@ -677,7 +677,7 @@ export class EvaluationClientWrapper {
             continue;
           }
 
-          vc = matchingVc
+          vc = matchingVc;
         } else {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
