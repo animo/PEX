@@ -7,6 +7,7 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
   SdJwtDecodedVerifiableCredential,
+  WrappedMdocCredential,
   WrappedVerifiableCredential,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types';
@@ -416,6 +417,8 @@ export class EvaluationClientWrapper {
       warnings: [],
     };
 
+    // Reset and configure the evaluation client on each iteration
+    this._client = new EvaluationClient();
     this._client.evaluate(pd, allWvcs, opts);
     result.warnings = this.formatNotInfo(Status.WARN);
     result.errors = this.formatNotInfo(Status.ERROR);
@@ -571,12 +574,12 @@ export class EvaluationClientWrapper {
 
     // Iterate over each descriptor in the submission
     for (const [descriptorIndex, descriptor] of submission.descriptor_map.entries()) {
-      let matchingVps: WrappedVerifiablePresentation[] = [];
+      let matchingVp: WrappedVerifiablePresentation;
 
       if (presentationSubmissionLocation === PresentationSubmissionLocation.EXTERNAL) {
         // Extract VPs matching the descriptor path
         const vpResults = JsonPathUtils.extractInputField(wvps, [descriptor.path]) as Array<{
-          value: WrappedVerifiablePresentation[];
+          value: WrappedVerifiablePresentation;
         }>;
 
         if (!vpResults.length) {
@@ -587,45 +590,56 @@ export class EvaluationClientWrapper {
             message: `Unable to extract path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] from presentation(s)`,
           });
           continue;
-        }
-
-        // Flatten the array of VPs
-        const allVps = vpResults.flatMap((vpResult) => vpResult.value);
-
-        // Filter VPs that match the required format
-        matchingVps = allVps.filter((vp) => vp.format === descriptor.format);
-
-        if (!matchingVps.length) {
+        } else if (vpResults.length > 1) {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
             status: Status.ERROR,
-            tag: 'SubmissionFormatNoMatch',
-            message: `No VP at path ${descriptor.path} matches the required format ${descriptor.format}`,
+            tag: 'SubmissionPathMultipleEntries',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] resulted in multiple values being returned.`,
           });
           continue;
         }
 
-        // Log a warning if multiple VPs match the descriptor
-        if (matchingVps.length > 1) {
-          result.warnings?.push({
-            status: Status.WARN,
-            tag: 'MultipleVpsMatched',
-            message: `Multiple VPs matched for descriptor_path[${descriptorIndex}]. Using the first matching VP.`,
+        matchingVp = vpResults[0].value;
+        if (Array.isArray(matchingVp)) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionPathMultipleEntries',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] returned multiple entires. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.`,
           });
+          continue;
+        }
+        if (!matchingVp) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionPathNotFound',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] succeeded, but the value was undefined.`,
+          });
+          continue;
+        }
+
+        if (matchingVp.format !== descriptor.format) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionFormatNoMatch',
+            message: `The VP at path ${descriptor.path} does not match the required format ${descriptor.format}`,
+          });
+          continue;
         }
       } else {
         // When submission location is PRESENTATION, assume a single VP
-        matchingVps = Array.isArray(wvps) ? [wvps[0]] : [wvps];
+        matchingVp = Array.isArray(wvps) ? wvps[0] : wvps;
       }
 
-      // Process the first matching VP
-      const vp = matchingVps[0];
       let vc: WrappedVerifiableCredential;
       let vcPath: string = `presentation ${descriptor.path}`;
 
       if (presentationSubmissionLocation === PresentationSubmissionLocation.EXTERNAL) {
         if (descriptor.path_nested) {
-          const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor.path_nested, descriptorIndex.toString(), vp);
+          const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor.path_nested, descriptorIndex.toString(), matchingVp);
           if (extractionResult.error) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push(extractionResult.error);
@@ -635,7 +649,7 @@ export class EvaluationClientWrapper {
           vc = extractionResult.wvc;
           vcPath += ` with nested credential ${descriptor.path_nested.path}`;
         } else if (descriptor.format === 'vc+sd-jwt') {
-          if (!vp.vcs || !vp.vcs.length) {
+          if (!matchingVp.vcs || !matchingVp.vcs.length) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({
               status: Status.ERROR,
@@ -644,18 +658,37 @@ export class EvaluationClientWrapper {
             });
             continue;
           }
-          vc = vp.vcs[0];
+          vc = matchingVp.vcs[0];
+        } else if (descriptor.format === 'mso_mdoc') {
+          // We already know the format is mso_mdoc so this cast is safe
+          const vcs = matchingVp.vcs as WrappedMdocCredential[];
+          vcPath += ` with nested mdoc with doctype ${descriptor.id}`;
+
+          const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType.asStr);
+
+          if (!matchingVc) {
+            const allDoctypes = vcs.map((vc) => `'${vc.credential.docType.asStr}'`).join(', ');
+            result.areRequiredCredentialsPresent = Status.ERROR;
+            result.errors?.push({
+              status: Status.ERROR,
+              tag: 'NoCredentialsFound',
+              message: `No mdoc credential with doctype '${descriptor.id}' found in mdoc vp. Available documents are ${allDoctypes}`,
+            });
+            continue;
+          }
+
+          vc = matchingVc;
         } else {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
             status: Status.ERROR,
             tag: 'UnsupportedFormat',
-            message: `VP format ${vp.format} is not supported`,
+            message: `VP format ${matchingVp.format} is not supported`,
           });
           continue;
         }
       } else {
-        const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor, descriptorIndex.toString(), vp);
+        const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor, descriptorIndex.toString(), matchingVp);
         if (extractionResult.error) {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push(extractionResult.error);
@@ -671,7 +704,9 @@ export class EvaluationClientWrapper {
 
       // Determine holder DIDs
       const holderDIDs =
-        CredentialMapper.isW3cPresentation(vp.presentation) && vp.presentation.holder ? [vp.presentation.holder] : opts?.holderDIDs || [];
+        CredentialMapper.isW3cPresentation(matchingVp.presentation) && matchingVp.presentation.holder
+          ? [matchingVp.presentation.holder]
+          : opts?.holderDIDs || [];
 
       if (pd.input_descriptors.findIndex((_id) => _id.id === descriptor.id) === -1) {
         result.areRequiredCredentialsPresent = Status.ERROR;
