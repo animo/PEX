@@ -417,6 +417,8 @@ export class EvaluationClientWrapper {
       warnings: [],
     };
 
+    // Reset and configure the evaluation client on each iteration
+    this._client = new EvaluationClient();
     this._client.evaluate(pd, allWvcs, opts);
     result.warnings = this.formatNotInfo(Status.WARN);
     result.errors = this.formatNotInfo(Status.ERROR);
