@@ -7,6 +7,7 @@ import {
   IVerifiablePresentation,
   OriginalVerifiableCredential,
   SdJwtDecodedVerifiableCredential,
+  WrappedMdocCredential,
   WrappedVerifiableCredential,
   WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types';
@@ -54,7 +55,7 @@ interface SubmissionSatisfiesDefinitionResult {
   /**
    * Only populated if submission requirements are present
    */
-  submisisonRequirementResults?: SubmissionSatisfiesSubmissionRequirementResult[];
+  submissionRequirementResults?: SubmissionSatisfiesSubmissionRequirementResult[];
 }
 
 export class EvaluationClientWrapper {
@@ -416,6 +417,8 @@ export class EvaluationClientWrapper {
       warnings: [],
     };
 
+    // Reset and configure the evaluation client on each iteration
+    this._client = new EvaluationClient();
     this._client.evaluate(pd, allWvcs, opts);
     result.warnings = this.formatNotInfo(Status.WARN);
     result.errors = this.formatNotInfo(Status.ERROR);
@@ -432,7 +435,7 @@ export class EvaluationClientWrapper {
         : Array.isArray(wvps);
 
     if (this._client.generatePresentationSubmission && result.value && useExternalSubmission) {
-      // we map the descriptors of the generated submisison to take into account the nexted values
+      // we map the descriptors of the generated submission to take into account the nexted values
       result.value.descriptor_map = result.value.descriptor_map.map((descriptor) => {
         const [wvcResult] = JsonPathUtils.extractInputField(allWvcs, [descriptor.path]) as Array<{
           value: WrappedVerifiableCredential;
@@ -553,6 +556,15 @@ export class EvaluationClientWrapper {
       value: submission,
     };
 
+    if (submission.definition_id !== pd.id) {
+      result.areRequiredCredentialsPresent = Status.ERROR;
+      result.errors?.push({
+        status: Status.ERROR,
+        tag: 'SubmissionDefinitionIdNotFound',
+        message: `Presentation submission defines definition_id '${submission.definition_id}', but the provided definition has id '${pd.id}'`,
+      });
+    }
+
     // If only a single VP is passed that is not w3c and no presentationSubmissionLocation, we set the default location to presentation. Otherwise we assume it's external
     const presentationSubmissionLocation =
       opts?.presentationSubmissionLocation ??
@@ -562,12 +574,12 @@ export class EvaluationClientWrapper {
 
     // Iterate over each descriptor in the submission
     for (const [descriptorIndex, descriptor] of submission.descriptor_map.entries()) {
-      let matchingVps: WrappedVerifiablePresentation[] = [];
+      let matchingVp: WrappedVerifiablePresentation;
 
       if (presentationSubmissionLocation === PresentationSubmissionLocation.EXTERNAL) {
         // Extract VPs matching the descriptor path
         const vpResults = JsonPathUtils.extractInputField(wvps, [descriptor.path]) as Array<{
-          value: WrappedVerifiablePresentation[];
+          value: WrappedVerifiablePresentation;
         }>;
 
         if (!vpResults.length) {
@@ -578,45 +590,56 @@ export class EvaluationClientWrapper {
             message: `Unable to extract path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] from presentation(s)`,
           });
           continue;
-        }
-
-        // Flatten the array of VPs
-        const allVps = vpResults.flatMap((vpResult) => vpResult.value);
-
-        // Filter VPs that match the required format
-        matchingVps = allVps.filter((vp) => vp.format === descriptor.format);
-
-        if (!matchingVps.length) {
+        } else if (vpResults.length > 1) {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
             status: Status.ERROR,
-            tag: 'SubmissionFormatNoMatch',
-            message: `No VP at path ${descriptor.path} matches the required format ${descriptor.format}`,
+            tag: 'SubmissionPathMultipleEntries',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] resulted in multiple values being returned.`,
           });
           continue;
         }
 
-        // Log a warning if multiple VPs match the descriptor
-        if (matchingVps.length > 1) {
-          result.warnings?.push({
-            status: Status.WARN,
-            tag: 'MultipleVpsMatched',
-            message: `Multiple VPs matched for descriptor_path[${descriptorIndex}]. Using the first matching VP.`,
+        matchingVp = vpResults[0].value;
+        if (Array.isArray(matchingVp)) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionPathMultipleEntries',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] returned multiple entires. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.`,
           });
+          continue;
+        }
+        if (!matchingVp) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionPathNotFound',
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] succeeded, but the value was undefined.`,
+          });
+          continue;
+        }
+
+        if (matchingVp.format !== descriptor.format) {
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push({
+            status: Status.ERROR,
+            tag: 'SubmissionFormatNoMatch',
+            message: `The VP at path ${descriptor.path} does not match the required format ${descriptor.format}`,
+          });
+          continue;
         }
       } else {
         // When submission location is PRESENTATION, assume a single VP
-        matchingVps = Array.isArray(wvps) ? [wvps[0]] : [wvps];
+        matchingVp = Array.isArray(wvps) ? wvps[0] : wvps;
       }
 
-      // Process the first matching VP
-      const vp = matchingVps[0];
       let vc: WrappedVerifiableCredential;
       let vcPath: string = `presentation ${descriptor.path}`;
 
       if (presentationSubmissionLocation === PresentationSubmissionLocation.EXTERNAL) {
         if (descriptor.path_nested) {
-          const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor.path_nested, descriptorIndex.toString(), vp);
+          const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor.path_nested, descriptorIndex.toString(), matchingVp);
           if (extractionResult.error) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push(extractionResult.error);
@@ -626,7 +649,7 @@ export class EvaluationClientWrapper {
           vc = extractionResult.wvc;
           vcPath += ` with nested credential ${descriptor.path_nested.path}`;
         } else if (descriptor.format === 'vc+sd-jwt') {
-          if (!vp.vcs || !vp.vcs.length) {
+          if (!matchingVp.vcs || !matchingVp.vcs.length) {
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({
               status: Status.ERROR,
@@ -635,18 +658,37 @@ export class EvaluationClientWrapper {
             });
             continue;
           }
-          vc = vp.vcs[0];
+          vc = matchingVp.vcs[0];
+        } else if (descriptor.format === 'mso_mdoc') {
+          // We already know the format is mso_mdoc so this cast is safe
+          const vcs = matchingVp.vcs as WrappedMdocCredential[];
+          vcPath += ` with nested mdoc with doctype ${descriptor.id}`;
+
+          const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType.asStr);
+
+          if (!matchingVc) {
+            const allDoctypes = vcs.map((vc) => `'${vc.credential.docType.asStr}'`).join(', ');
+            result.areRequiredCredentialsPresent = Status.ERROR;
+            result.errors?.push({
+              status: Status.ERROR,
+              tag: 'NoCredentialsFound',
+              message: `No mdoc credential with doctype '${descriptor.id}' found in mdoc vp. Available documents are ${allDoctypes}`,
+            });
+            continue;
+          }
+
+          vc = matchingVc;
         } else {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push({
             status: Status.ERROR,
             tag: 'UnsupportedFormat',
-            message: `VP format ${vp.format} is not supported`,
+            message: `VP format ${matchingVp.format} is not supported`,
           });
           continue;
         }
       } else {
-        const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor, descriptorIndex.toString(), vp);
+        const extractionResult = this.extractWrappedVcFromWrappedVp(descriptor, descriptorIndex.toString(), matchingVp);
         if (extractionResult.error) {
           result.areRequiredCredentialsPresent = Status.ERROR;
           result.errors?.push(extractionResult.error);
@@ -662,26 +704,37 @@ export class EvaluationClientWrapper {
 
       // Determine holder DIDs
       const holderDIDs =
-        CredentialMapper.isW3cPresentation(vp.presentation) && vp.presentation.holder ? [vp.presentation.holder] : opts?.holderDIDs || [];
+        CredentialMapper.isW3cPresentation(matchingVp.presentation) && matchingVp.presentation.holder
+          ? [matchingVp.presentation.holder]
+          : opts?.holderDIDs || [];
 
-      // Get the presentation definition specific to the current descriptor
-      const pdForDescriptor = this.internalPresentationDefinitionForDescriptor(pd, descriptor.id);
-
-      // Reset and configure the evaluation client on each iteration
-      this._client = new EvaluationClient();
-      this._client.evaluate(pdForDescriptor, [vc], {
-        ...opts,
-        holderDIDs,
-        presentationSubmission: undefined,
-        generatePresentationSubmission: undefined,
-      });
-
-      // Check if the evaluation resulted in exactly one descriptor map entry
-      if (this._client.presentationSubmission.descriptor_map.length !== 1) {
-        const submissionDescriptor = `submission.descriptor_map[${descriptorIndex}]`;
+      if (pd.input_descriptors.findIndex((_id) => _id.id === descriptor.id) === -1) {
         result.areRequiredCredentialsPresent = Status.ERROR;
-        result.errors?.push(...this.formatNotInfo(Status.ERROR, submissionDescriptor, vcPath));
-        result.warnings?.push(...this.formatNotInfo(Status.WARN, submissionDescriptor, vcPath));
+        result.errors?.push({
+          status: Status.ERROR,
+          tag: 'SubmissionInputDescriptorIdNotFound',
+          message: `Submission references descriptor id '${descriptor.id}' but presentation definition with id '${pd.id}' does not have an input descriptor with this id. Available input descriptors are ${pd.input_descriptors.map((i) => `'${i.id}'`).join(', ')}`,
+        });
+      } else {
+        // Get the presentation definition specific to the current descriptor
+        const pdForDescriptor = this.internalPresentationDefinitionForDescriptor(pd, descriptor.id);
+
+        // Reset and configure the evaluation client on each iteration
+        this._client = new EvaluationClient();
+        this._client.evaluate(pdForDescriptor, [vc], {
+          ...opts,
+          holderDIDs,
+          presentationSubmission: undefined,
+          generatePresentationSubmission: undefined,
+        });
+
+        // Check if the evaluation resulted in exactly one descriptor map entry
+        if (this._client.presentationSubmission.descriptor_map.length !== 1) {
+          const submissionDescriptor = `submission.descriptor_map[${descriptorIndex}]`;
+          result.areRequiredCredentialsPresent = Status.ERROR;
+          result.errors?.push(...this.formatNotInfo(Status.ERROR, submissionDescriptor, vcPath));
+          result.warnings?.push(...this.formatNotInfo(Status.WARN, submissionDescriptor, vcPath));
+        }
       }
     }
 
@@ -800,10 +853,10 @@ export class EvaluationClientWrapper {
 
       result.totalRequiredMatches = pd.submission_requirements.length;
       result.totalMatches = submissionRequirementResults.filter((r) => r.isSubmissionRequirementSatisfied).length;
-      result.submisisonRequirementResults = submissionRequirementResults;
+      result.submissionRequirementResults = submissionRequirementResults;
 
       if (result.totalMatches !== result.totalRequiredMatches) {
-        result.error = `Expected all submission requirements (${result.totalRequiredMatches}) to be satisfifed in submission, but found ${result.totalMatches}.`;
+        result.error = `Expected all submission requirements (${result.totalRequiredMatches}) to be satisfied in submission, but found ${result.totalMatches}.`;
       }
     } else {
       result.totalRequiredMatches = pd.input_descriptors.length;
@@ -811,7 +864,7 @@ export class EvaluationClientWrapper {
       const notInSubmission = pd.input_descriptors.filter((inputDescriptor) => !submissionDescriptorIds.includes(inputDescriptor.id));
 
       if (notInSubmission.length > 0) {
-        result.error = `Expected all input descriptors (${pd.input_descriptors.length}) to be satisfifed in submission, but found ${submissionDescriptorIds.length}. Missing ${notInSubmission.map((d) => d.id).join(', ')}`;
+        result.error = `Expected all input descriptors (${pd.input_descriptors.map((i) => `'${i.id}'`).join(', ')}) to be satisfied in submission, but found ${submissionDescriptorIds.map((i) => `'${i}'`).join(',')}. Missing ${notInSubmission.map((d) => `'${d.id}'`).join(', ')}`;
       }
     }
 
@@ -820,8 +873,15 @@ export class EvaluationClientWrapper {
   }
 
   private internalPresentationDefinitionForDescriptor(pd: IInternalPresentationDefinition, descriptorId: string): IInternalPresentationDefinition {
+    const inputDescriptorIndex = pd.input_descriptors.findIndex((i) => i.id === descriptorId);
+    // If we receive a submission with input descriptors that do not exist
+    if (inputDescriptorIndex === -1) {
+      throw new Error(
+        `Input descriptor with id '${descriptorId}' not found in presentation definition with id '${pd.id}'. Available input descriptors are ${pd.input_descriptors.map((i) => `'${i.id}'`).join(', ')}`,
+      );
+    }
+
     if (pd instanceof InternalPresentationDefinitionV2) {
-      const inputDescriptorIndex = pd.input_descriptors.findIndex((i) => i.id === descriptorId);
       return new InternalPresentationDefinitionV2(
         pd.id,
         [pd.input_descriptors[inputDescriptorIndex]],
@@ -833,7 +893,6 @@ export class EvaluationClientWrapper {
         undefined,
       );
     } else if (pd instanceof InternalPresentationDefinitionV1) {
-      const inputDescriptorIndex = pd.input_descriptors.findIndex((i) => i.id === descriptorId);
       return new InternalPresentationDefinitionV1(
         pd.id,
         [pd.input_descriptors[inputDescriptorIndex]],

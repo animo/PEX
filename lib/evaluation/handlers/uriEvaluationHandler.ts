@@ -4,6 +4,7 @@ import {
   CredentialMapper,
   ICredential,
   ICredentialSchema,
+  MdocDocument,
   OriginalType,
   SdJwtDecodedVerifiableCredential,
   WrappedVerifiableCredential,
@@ -125,7 +126,7 @@ export class UriEvaluationHandler extends AbstractEvaluationHandler {
     }
   }
 
-  private static buildVcContextAndSchemaUris(credential: ICredential | SdJwtDecodedVerifiableCredential, version: PEVersion) {
+  private static buildVcContextAndSchemaUris(credential: ICredential | SdJwtDecodedVerifiableCredential | MdocDocument, version: PEVersion) {
     const uris: string[] = [];
 
     // W3C credential

@@ -35,14 +35,26 @@ export function definitionVersionDiscovery(presentationDefinition: IPresentation
   JsonPathUtils.changePropertyNameRecursively(presentationDefinitionCopy, '_enum', 'enum');
   const data = { presentation_definition: presentationDefinitionCopy };
   let result = validatePDv2(data);
+
   if (result) {
     return { version: PEVersion.v2 };
   }
+  // Errors are added to the validation method, but not typed correctly
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const v2Errors = validatePDv2.errors;
+
   result = validatePDv1(data);
   if (result) {
     return { version: PEVersion.v1 };
   }
-  return { error: 'This is not a valid PresentationDefinition' };
+
+  // Errors are added to the validation method, but not typed correctly
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const v1Errors = validatePDv1.errors;
+
+  return { error: 'This is not a valid PresentationDefinition', v1Errors, v2Errors };
 }
 
 export function uniformDIDMethods(dids?: string[], opts?: { removePrefix: 'did:' }) {

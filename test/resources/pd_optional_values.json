@@ -1,0 +1,56 @@
+{
+  "presentation_definition": {
+    "id": "90acec0e-1bc7-4769-ab43-02995d7582c4",
+    "format": {
+      "jwt_vp_json": {
+        "alg": ["EdDSA", "ES256K", "PS256", "ES256"]
+      },
+      "jwt_vc_json": {
+        "alg": ["EdDSA", "ES256K", "PS256", "ES256"]
+      },
+      "ldp_vp": {
+        "proof_type": ["Ed25519Signature2018", "Ed25519Signature2020", "JsonWebSignature2020"]
+      },
+      "ldp_vc": {
+        "proof_type": ["Ed25519Signature2018", "Ed25519Signature2020", "JsonWebSignature2020"]
+      },
+      "jwt_vc": {
+        "alg": ["ES256"]
+      },
+      "jwt_vp": {
+        "alg": ["ES256"]
+      }
+    },
+    "input_descriptors": [
+      {
+        "id": "be2ca7fc-71c2-40d8-92e0-64b407b26b1a",
+        "format": {
+          "jwt_vc_json": {
+            "alg": ["ES256", "ES256K", "PS256", "EdDSA"]
+          },
+          "jwt_vp_json": {
+            "alg": ["ES256", "ES256K", "PS256", "EdDSA"]
+          },
+          "jwt_vc": {
+            "alg": ["ES256"]
+          },
+          "jwt_vp": {
+            "alg": ["ES256"]
+          }
+        },
+        "constraints": {
+          "fields": [
+            {
+              "path": ["$.vc.type", "$.type"],
+              "optional": true,
+              "filter": {
+                "type": "string",
+                "pattern": "OpenBadgeCredential"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

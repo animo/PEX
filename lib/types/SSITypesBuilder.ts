@@ -63,7 +63,11 @@ export class SSITypesBuilder {
   static toInternalPresentationDefinition(presentationDefinition: IPresentationDefinition): IInternalPresentationDefinition {
     const presentationDefinitionCopy: IPresentationDefinition = JSON.parse(JSON.stringify(presentationDefinition));
     const versionResult: DiscoveredVersion = definitionVersionDiscovery(presentationDefinitionCopy);
-    if (versionResult.error) throw versionResult.error;
+    if (versionResult.error) {
+      throw new Error(
+        `${versionResult.error} \nv1 errors:\n${JSON.stringify(versionResult.v1Errors, null, 2)} \n\nv2 errors:\n${JSON.stringify(versionResult.v2Errors, null, 2)}`,
+      );
+    }
     if (versionResult.version == PEVersion.v1) {
       return SSITypesBuilder.modelEntityToInternalPresentationDefinitionV1(presentationDefinitionCopy as PresentationDefinitionV1);
     }

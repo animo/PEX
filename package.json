@@ -47,7 +47,7 @@
     "@sd-jwt/present": "^0.7.2",
     "@sd-jwt/types": "^0.7.2",
     "@sphereon/pex-models": "^2.3.1",
-    "@sphereon/ssi-types": "0.30.1",
+    "@sphereon/ssi-types": "0.30.2-next.135",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "jwt-decode": "^3.1.2",
@@ -87,5 +87,6 @@
   "prettier": {
     "singleQuote": true,
     "printWidth": 150
-  }
+  },
+  "packageManager": "pnpm@9.4.0+sha256.b6fd0bfda555e7e584ad7e56b30c68b01d5a04f9ee93989f4b93ca8473c49c74"
 }

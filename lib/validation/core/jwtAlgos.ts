@@ -11,6 +11,8 @@ export class JwtAlgos {
       'ES256',
       'ES384',
       'ES512',
+      'ES256K',
+      'EdDSA',
       'PS256',
       'PS384',
       'PS512',
