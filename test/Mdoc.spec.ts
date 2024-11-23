@@ -97,8 +97,7 @@ describe('evaluate mdoc', () => {
     expect(result.errors?.length).toEqual(0);
     expect(result.matches).toEqual([
       {
-        name: 'org.eu.university',
-        rule: 'all',
+        areRequiredCredentialsPresent: 'info',
         vc_path: ['$.verifiableCredential[0]'],
         type: SubmissionRequirementMatchType.InputDescriptor,
         id: 'org.eu.university',
@@ -118,16 +117,14 @@ describe('evaluate mdoc', () => {
     expect(result.errors?.length).toEqual(0);
     expect(result.matches).toEqual([
       {
-        name: 'org.eu.university',
-        rule: 'all',
+        areRequiredCredentialsPresent: 'info',
         vc_path: ['$.verifiableCredential[0]'],
         type: SubmissionRequirementMatchType.InputDescriptor,
         id: 'org.eu.university',
       },
       {
         id: 'OpenBadgeCredentialDescriptor',
-        name: 'OpenBadgeCredentialDescriptor',
-        rule: 'all',
+        areRequiredCredentialsPresent: 'info',
         type: SubmissionRequirementMatchType.InputDescriptor,
         vc_path: ['$.verifiableCredential[1]'],
       },
