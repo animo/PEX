@@ -1,6 +1,6 @@
 {
-  "name": "@sphereon/pex",
-  "version": "5.0.0-unstable.19",
+  "name": "@animo-id/pex",
+  "version": "5.0.0-unstable.20",
   "description": "A Typescript implementation of the v1 and v2 DIF Presentation Exchange specification",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
@@ -8,6 +8,9 @@
   "typings": "dist/main/index.d.ts",
   "repository": "https://github.com/Sphereon-Opensource/pex.git",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "SSI",
     "Presentation Exchange",
@@ -36,7 +39,8 @@
     "test:lint": "eslint . --ext .ts",
     "test:prettier": "prettier \"{lib,test}/**/*.ts\" --list-different",
     "test:cov": "jest --ci --coverage",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "release": "release-it"
   },
   "engines": {
     "node": ">=18"
@@ -73,7 +77,8 @@
     "ts-jest": "^29.1.2",
     "ts-json-schema-generator": "^1.5.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "release-it": "^17.4.1"
   },
   "files": [
     "index.ts",

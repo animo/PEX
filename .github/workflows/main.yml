@@ -12,29 +12,68 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - uses: pnpm/action-setup@v4
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18.x'
-        cache: 'pnpm'
-    - run: git diff -u
-    - run: pnpm install --frozen-lockfile
-    - run: pnpm build
-    - name: tsc
-      uses: icrawl/action-tsc@v1
-    - name: pnpm test
-      run: pnpm test
-    - name: codecov
-      uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        name: codecove # optional
-        flags: unittest
-        fail_ci_if_error: true # optional (default = false)
-        #directory: ./coverage/reports/
-        #files: ./coverage1.xml,./coverage2.xml
-        verbose: true # optional (default = false)
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'pnpm'
+      - run: git diff -u
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: tsc
+        uses: icrawl/action-tsc@v1
+      - name: pnpm test
+        run: pnpm test
+    # - name: codecov
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+    #     name: codecove # optional
+    #     flags: unittest
+    #     fail_ci_if_error: true # optional (default = false)
+    #     #directory: ./coverage/reports/
+    #     #files: ./coverage1.xml,./coverage2.xml
+    #     verbose: true # optional (default = false)
+
+  continuous-deployment:
+    if: github.event_name == 'workflow_dispatch'
+
+    name: 'Continuous Deployment'
+    runs-on: ubuntu-latest
+    needs: ['build']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Set git configuration
+        run: |
+          git config user.name "Animo Solutions"
+          git config user.email "development@animo.id"
+
+      - name: Publish
+        id: publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+
+          if [ ${{ inputs.release-type }} == 'alpha' ]; then
+            pnpm release --preRelease=alpha
+          else
+            pnpm release -i=${{ inputs.release-type }}
+          fi

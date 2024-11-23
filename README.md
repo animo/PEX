@@ -1,3 +1,7 @@
+> [!WARNING]
+> This is a temporary fork and release of the original PEX library by Sphereon.
+> https://github.com/Sphereon-Opensource/pex
+
 <h1 align="center">
   <br>
   <a href="https://www.sphereon.com"><img src="https://sphereon.com/content/themes/sphereon/assets/img/logo.svg" alt="Sphereon" width="400"></a>
@@ -78,14 +82,14 @@ The core functionality of the DIF Presentation Exchange can be outlined as follo
 
 - Verifiers/Agents:
 
-    - [Input Evaluation](#verifier-input-evaluation)
-    - [Utilities](#utilities)
+  - [Input Evaluation](#verifier-input-evaluation)
+  - [Utilities](#utilities)
 
 - Holders/Wallets:
-    - [Credential Query](#holder-credential-query)
-    - [Non-Verifiable Presentation creation](#holder-presentation-creation-non-verifiable)
-    - [Verifiable Presentation creation](#holder-verifiable-presentation-with-callback)
-    - [Utilities](#utilities)
+  - [Credential Query](#holder-credential-query)
+  - [Non-Verifiable Presentation creation](#holder-presentation-creation-non-verifiable)
+  - [Verifiable Presentation creation](#holder-verifiable-presentation-with-callback)
+  - [Utilities](#utilities)
 
 ### Verifier: Create a Presentation Definition object:
 
@@ -98,7 +102,7 @@ PEX library supports two versions of `presentation_definition` object. The detai
 in `@spehereon/pex-models` below you can find some tips about querying via a presentation_definition object:
 
 - Using the `constraint` field:
-    - You can use the constraint field for creating your query:
+  - You can use the constraint field for creating your query:
 
 ```js
 constraints: {
@@ -107,18 +111,18 @@ constraints: {
       path: ['$.credentialSubject.role'],
       filter: {
         type: 'string',
-        const: 'admin'
-      }
-    }
+        const: 'admin',
+      },
+    },
   ];
 }
 ```
 
 - for special cases, like querying fields that start with `@` you can use the following syntax:
-    - You can use the following syntax, PEX will change it to correct query itself:
+  - You can use the following syntax, PEX will change it to correct query itself:
 
 ```js
-path: ['$.@context', '$.vc.@context']
+path: ['$.@context', '$.vc.@context'];
 ```
 
 For querying the arrays, right now we don't support the [json-schema](http://json-schema.org/draft-07/schema#) fully,
@@ -128,14 +132,12 @@ but we do support the following syntax:
 
 ```json
 {
-  fields: [
+  "fields": [
     {
-      path: [
-        '$.type.[*]'
-      ],
-      filter: {
-        type: 'string',
-        pattern: 'AlumniCredential'
+      "path": ["$.type.[*]"],
+      "filter": {
+        "type": "string",
+        "pattern": "AlumniCredential"
       }
     }
   ]
@@ -146,14 +148,12 @@ but we do support the following syntax:
 
 ```json
 {
-  fields: [
+  "fields": [
     {
-      path: [
-        '$.type.*'
-      ],
-      filter: {
-        type: 'string',
-        pattern: 'AlumniCredential'
+      "path": ["$.type.*"],
+      "filter": {
+        "type": "string",
+        "pattern": "AlumniCredential"
       }
     }
   ]
@@ -168,15 +168,11 @@ but we do support the following syntax:
 {
   "fields": [
     {
-      "path": [
-        "$.type"
-      ],
+      "path": ["$.type"],
       "filter": {
         "type": "array",
         "contains": {
-          "enum": [
-            "https://example.com/type"
-          ]
+          "enum": ["https://example.com/type"]
         }
       }
     }
@@ -297,7 +293,7 @@ const pex: PEX = new PEX();
 
 // Construct presentation from selected credentials
 const presentationResult: PresentationResult = pex.presentationFrom(presentationDefinition, selectedCredentials, { holderDIDs: [holderDID] });
-const presentation = presentationResult.presentation
+const presentation = presentationResult.presentation;
 /** presentation object:
  *
  *   {
@@ -506,15 +502,7 @@ export interface PresentationSignCallBackParams {
 A simple use case using your library of choice for non-selective disclosure using an ed25519 key and signature.
 
 ```typescript
-import {
-  PEX,
-  IProof,
-  ProofPurpose,
-  ProofType,
-  IVerifiablePresentation,
-  PresentationSignOptions,
-  KeyEncoding,
-} from '@sphereon/pex';
+import { PEX, IProof, ProofPurpose, ProofType, IVerifiablePresentation, PresentationSignOptions, KeyEncoding } from '@sphereon/pex';
 
 const pex: PEX = new PEX();
 
@@ -531,12 +519,7 @@ const params: VerifiablePresentationFromOpts = {
   },
 };
 
-const vp = await pex.verifiablePresentationFrom(
-  presentationDefinition,
-  selectedCredentials,
-  simpleSignedProofCallback,
-  params
-);
+const vp = await pex.verifiablePresentationFrom(presentationDefinition, selectedCredentials, simpleSignedProofCallback, params);
 
 function simpleSignedProofCallback(callBackParams: PresentationSignCallBackParams): IVerifiablePresentation {
   // Prereq is properly filled out `proofOptions` and `signatureOptions`, together with a `proofValue` or `jws` value.
@@ -556,7 +539,7 @@ function simpleSignedProofCallback(callBackParams: PresentationSignCallBackParam
    * }
    */
 
-    // Just an example. Obviously your lib will have a different method signature
+  // Just an example. Obviously your lib will have a different method signature
   const vp = myVPSignLibrary(presentation, { ...proof, privateKeyBase58 });
 
   return vp;
@@ -610,7 +593,7 @@ presentation here.
 #### Parameters
 
 | name                     | type                     | description                                                                                                                                    |
-|--------------------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `presentationDefinition` | `PresentationDefinition` | the presentation definition that initiated the request from the verifier                                                                       |
 | `presentation`           | `IPresentation`          | the Presentation object containing the required credentials and a `presentation_submission` object mapping back to the presentation definition |
 
@@ -650,7 +633,7 @@ You, or rather the user, typically has to do a final selection.
 #### selectFrom Parameters
 
 | name                     | type                                                                    | description                                                                                                                                                  |
-|--------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `presentationDefinition` | `PresentationDefinition`                                                | the presentation definition that initiated the request from the verifier                                                                                     |
 | `credentials`            | `(IVerifiableCredential or JwtWrappedVerifiableCredential or string)[]` | the array of verifiable credentials to select from                                                                                                           |
 | `{ holderDIDs }`         | `string[]`                                                              | the holder's DIDs. this can be found in VerifiablePresentation's holder property note that a wallet can have many holderDIDs retrieved from different places |
@@ -723,7 +706,7 @@ maps the submitted credentials to the requested inputs in the `presentationDefin
 #### presentationFromV1 Parameters
 
 | name                     | type                                                                    | description                                                                                                                                                  |
-|--------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `presentationDefinition` | `PresentationDefinitionV1`                                              | the v1 presentation definition that initiated the request from the verifier                                                                                  |
 | `selectedCredentials`    | `(IVerifiableCredential or JwtWrappedVerifiableCredential or string)[]` | the array of verifiable credentials that meet the submission requirements in the presentation definition                                                     |
 | `{ holderDID }`          | `string`                                                                | the holder's DID. This can be found in IVerifiablePresentation's holder property note that a wallet can have many holderDIDs retrieved from different places |
@@ -731,7 +714,7 @@ maps the submitted credentials to the requested inputs in the `presentationDefin
 #### presentationFromV2 Parameters
 
 | name                     | type                                                                    | description                                                                                                                                                  |
-|--------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `presentationDefinition` | `PresentationDefinitionV2`                                              | the v2 presentation definition that initiated the request from the verifier                                                                                  |
 | `selectedCredentials`    | `(IVerifiableCredential or JwtWrappedVerifiableCredential or string)[]` | the array of verifiable credentials that meet the submission requirements in the presentation definition                                                     |
 | `{ holderDID }`          | `string`                                                                | the holder's DID. This can be found in IVerifiablePresentation's holder property note that a wallet can have many holderDIDs retrieved from different places |
@@ -771,7 +754,7 @@ rules.
 #### Parameters
 
 | name            | type                                                              | description                                                            |
-|-----------------|-------------------------------------------------------------------|------------------------------------------------------------------------|
+| --------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | `objToValidate` | <code>PresentationDefinition &#124; PresentationSubmission</code> | the presentation definition or presentation submission to be validated |
 
 #### Return value
@@ -802,7 +785,7 @@ presentationDefinition object.
 #### Parameters
 
 | name                     | type                                | description                                                         |
-|--------------------------|-------------------------------------|---------------------------------------------------------------------|
+| ------------------------ | ----------------------------------- | ------------------------------------------------------------------- |
 | `presentationDefinition` | <code>PresentationDefinition</code> | the presentation definition that you need to decide the version for |
 
 #### Return value
@@ -832,10 +815,10 @@ predominant version, because it is typically used quite a bite in OpenID4VC scen
    Document object. Used for selective disclosure. Although this library does not use it currently, as we can perform it
    without frames.
 3. `filter` has several more options for filtering:
-    - formatMaximum
-    - formatMinimum
-    - formatExclusiveMaximum
-    - formatExclusiveMinimum
+   - formatMaximum
+   - formatMinimum
+   - formatExclusiveMaximum
+   - formatExclusiveMinimum
 
 As a result we introduced the `PEX` class to replace the former `PEJS` class. This class does feature detection on the
 presentation definition to determine whether it is a v1 or v2 spec. Then it delegates the functionality to the PEXv1 or
@@ -894,7 +877,7 @@ There are several other utility scripts that help with development.
 # Glossary
 
 | Term                    | Definition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Credential              | A set of one or more claims made by an issuer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Verifiable Credential   | Is a tamper-evident credential that has authorship that can be cryptographically verified. Verifiable credentials can be used to build Verifiable Presentations, which can also be cryptographically verified. The claims in a credential can be about different subjects. PEX accepts Verifiable credential in 3 forms: 1. JSON_LD which is know in our system as IVerifiableCredential, 2. JWT-Wrapped VC which is known in our system as JwtWrappedVerifiableCredential or string which is a valid Verifiable credential jwt |
 | Presentation Definition | Presentation Definitions are objects that articulate what proofs a Verifier requires.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -913,9 +896,9 @@ exception:
 - Support for hashlink verification in the schema part of the V1 specification is not fully incorporated as it depends
   on missing external library support. We generate a warning about the missing verification if we encounter them.
 - Support for complete [json-schema](http://json-schema.org/draft-07/schema#) in `pex-models`
-    - which means if you're relying on our version-discovery feature (with calling general `PEX`) and
-      sending `presentation_definition` object with unsupported fields, you'll get an exception. However if you call
-      specific version of PEX (PEXv1 or PEXv2) it will work.
+  - which means if you're relying on our version-discovery feature (with calling general `PEX`) and
+    sending `presentation_definition` object with unsupported fields, you'll get an exception. However if you call
+    specific version of PEX (PEXv1 or PEXv2) it will work.
 - The V2 implementation does not contain latest V2 changes. These will become available in V3 of this library
 
 ## Breaking changes
@@ -943,7 +926,7 @@ Presentation.
 The (Verifiable) Presentation object is present in the result object in the presentation resp. verifiablePresentation
 property.
 
-No more need for _const and _enum models/properties in Presentation Definitions. They are now `const` and `enum` (fixed
+No more need for \_const and \_enum models/properties in Presentation Definitions. They are now `const` and `enum` (fixed
 in OpenAPI model generation). The code replaces the previous versions to be sure.
 
 ### v0.6.0: class and package renamed
