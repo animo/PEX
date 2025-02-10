@@ -20,7 +20,6 @@
     "DIF"
   ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build": "run-s build:*",
     "build:generateFieldv1Schema": "ts-json-schema-generator -p resources/schema-generator-interfaces/filterV1.ts > resources/FilterV1.schema.json",
     "build:generateFieldv2Schema": "ts-json-schema-generator -p resources/schema-generator-interfaces/filterV2.ts > resources/FilterV2.schema.json",
