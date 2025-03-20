@@ -487,6 +487,10 @@ export class EvaluationClientWrapper {
         originalVc = Array.isArray(vcResult.value.verifiableCredential)
           ? vcResult.value.verifiableCredential[0]
           : vcResult.value.verifiableCredential;
+      } else if ('vp' in vcResult.value) {
+        originalVc = Array.isArray(vcResult.value.vp.verifiableCredential)
+          ? vcResult.value.vp.verifiableCredential[0]
+          : vcResult.value.vp.verifiableCredential;
       } else {
         throw Error('Could not deduce original VC from evaluation result');
       }
