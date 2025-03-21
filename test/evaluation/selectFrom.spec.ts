@@ -1,8 +1,7 @@
-import { createHash } from 'crypto';
 import fs from 'fs';
 
 import { SDJwt } from '@sd-jwt/core';
-import { IVerifiableCredential, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { defaultHasher, IVerifiableCredential, WrappedVerifiableCredential } from '@sphereon/ssi-types';
 
 import { PEX, Status } from '../../lib';
 import { EvaluationClientWrapper } from '../../lib/evaluation';
@@ -10,8 +9,6 @@ import { SubmissionRequirementMatchType } from '../../lib/evaluation/core';
 import { InternalPresentationDefinitionV1, InternalPresentationDefinitionV2, SSITypesBuilder } from '../../lib/types';
 import PexMessages from '../../lib/types/Messages';
 import { ClaimValue } from '../types';
-
-export const hasher = (data: string) => createHash('sha256').update(data).digest();
 
 function getFile(path: string) {
   return fs.readFileSync(path, 'utf-8');
@@ -25,9 +22,7 @@ const dids = ['did:example:ebfeb1f712ebc6f1c276e12ec21'];
 
 const LIMIT_DISCLOSURE_SIGNATURE_SUITES = ['BbsBlsSignatureProof2020'];
 
-const pex = new PEX({
-  hasher,
-});
+const pex = new PEX({});
 
 describe('selectFrom tests', () => {
   it('Evaluate submission requirements all from group A', () => {
@@ -981,7 +976,7 @@ describe('selectFrom tests', () => {
     vcs.push(getFile('test/dif_pe_examples/vc/vc-iata-epassport-sd.jwt').replace(/(\r\n|\n|\r)/gm, ''));
     const pd = SSITypesBuilder.modelEntityInternalPresentationDefinitionV2(pdSchema);
     const evaluationClientWrapper: EvaluationClientWrapper = new EvaluationClientWrapper();
-    const wvcs: WrappedVerifiableCredential[] = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs, hasher);
+    const wvcs: WrappedVerifiableCredential[] = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs);
     const result = evaluationClientWrapper.selectFrom(pd, wvcs, {
       holderDIDs: ['FAsYneKJhWBP2n5E21ZzdY'],
       limitDisclosureSignatureSuites: LIMIT_DISCLOSURE_SIGNATURE_SUITES,
@@ -991,8 +986,8 @@ describe('selectFrom tests', () => {
     pex.evaluateCredentials(pd, result.verifiableCredential!);
     const presentationResult = pex.presentationFrom(pd, result.verifiableCredential!);
     expect(presentationResult).toBeDefined();
-    const cred = await SDJwt.fromEncode(presentationResult.presentations[1].compactSdJwtVc, hasher);
-    const claims = await cred.getClaims<Record<string, ClaimValue>>(hasher);
+    const cred = await SDJwt.fromEncode(presentationResult.presentations[1].compactSdJwtVc, defaultHasher);
+    const claims = await cred.getClaims<Record<string, ClaimValue>>(defaultHasher);
 
     // Check data group 1
     expect((claims.electronicPassport as { dataGroup1: Record<string, string> }).dataGroup1.birthdate).toBe('2024-10-09');
@@ -1021,7 +1016,7 @@ describe('selectFrom tests', () => {
     vcs.push(getFile('test/dif_pe_examples/vc/vc-funke-pid-sd.jwt').replace(/(\r\n|\n|\r)/gm, ''));
     const pd = SSITypesBuilder.modelEntityInternalPresentationDefinitionV2(pdSchema);
     const evaluationClientWrapper: EvaluationClientWrapper = new EvaluationClientWrapper();
-    const wvcs: WrappedVerifiableCredential[] = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs, hasher);
+    const wvcs: WrappedVerifiableCredential[] = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs);
     const result = evaluationClientWrapper.selectFrom(pd, wvcs, {
       holderDIDs: ['FAsYneKJhWBP2n5E21ZzdY'],
       limitDisclosureSignatureSuites: LIMIT_DISCLOSURE_SIGNATURE_SUITES,
@@ -1031,8 +1026,8 @@ describe('selectFrom tests', () => {
     pex.evaluateCredentials(pd, result.verifiableCredential!);
     const presentationResult = pex.presentationFrom(pd, result.verifiableCredential!);
     expect(presentationResult).toBeDefined();
-    const cred = await SDJwt.fromEncode(presentationResult.presentations[0].compactSdJwtVc, hasher);
-    const claims = await cred.getClaims<Record<string, ClaimValue>>(hasher);
+    const cred = await SDJwt.fromEncode(presentationResult.presentations[0].compactSdJwtVc, defaultHasher);
+    const claims = await cred.getClaims<Record<string, ClaimValue>>(defaultHasher);
 
     // Check personal information
     expect(claims.family_name).toBe('MUSTERMANN');

@@ -2,7 +2,7 @@ import { getSDAlgAndPayload, unpackObj } from '@sd-jwt/decode';
 import { createHashMappingForSerializedDisclosure, selectDisclosures } from '@sd-jwt/present';
 import { PresentationFrame } from '@sd-jwt/types';
 import {
-  Hasher,
+  defaultHasher,
   SdJwtDecodedDisclosure,
   SdJwtDecodedVerifiableCredential,
   SdJwtDecodedVerifiableCredentialPayload,
@@ -12,8 +12,8 @@ import * as u8a from 'uint8arrays';
 
 import { ObjectUtils } from './ObjectUtils';
 
-export function calculateSdHash(compactSdJwtVc: string, alg: string, hasher: Hasher): string {
-  const digest = hasher(compactSdJwtVc, alg);
+export function calculateSdHash(compactSdJwtVc: string, alg: string): string {
+  const digest = defaultHasher(compactSdJwtVc, alg);
   return u8a.toString(digest, 'base64url');
 }
 

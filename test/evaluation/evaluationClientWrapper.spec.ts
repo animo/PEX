@@ -15,7 +15,6 @@ import { Status } from '../../lib';
 import { EvaluationClient, EvaluationClientWrapper } from '../../lib/evaluation';
 import { InternalPresentationDefinitionV1, InternalPresentationDefinitionV2 } from '../../lib/types';
 import { SSITypesBuilder } from '../../lib/types';
-import { hasher } from '../SdJwt.spec';
 
 import { EvaluationClientWrapperData } from './EvaluationClientWrapperData';
 
@@ -724,7 +723,7 @@ describe('evaluate', () => {
     const vcs: string[] = getFileAsJson('test/dif_pe_examples/vc/vc-2-sd-jwt.json').vcs;
     const pd = SSITypesBuilder.modelEntityInternalPresentationDefinitionV2(pdSchema);
     const evaluationClientWrapper: EvaluationClientWrapper = new EvaluationClientWrapper();
-    const evaluationResults = evaluationClientWrapper.evaluate(pd, SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs, hasher));
+    const evaluationResults = evaluationClientWrapper.evaluate(pd, SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(vcs));
     expect(evaluationResults).toMatchObject({
       verifiableCredential: [
         // It should keep two disclsures, but remove one. based on PD requirements.

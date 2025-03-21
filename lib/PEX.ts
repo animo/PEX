@@ -100,7 +100,7 @@ export class PEX {
     const presentationsCopy: OriginalVerifiablePresentation[] = JSON.parse(JSON.stringify(presentationsArray));
 
     const wrappedPresentations: WrappedVerifiablePresentation[] = presentationsCopy.map((p) =>
-      SSITypesBuilder.mapExternalVerifiablePresentationToWrappedVP(p, this.options?.hasher),
+      SSITypesBuilder.mapExternalVerifiablePresentationToWrappedVP(p),
     );
 
     let presentationSubmission = opts?.presentationSubmission;
@@ -189,10 +189,8 @@ export class PEX {
       restrictToDIDMethods?: string[];
     },
   ): EvaluationResults {
-    const wrappedVerifiableCredentials: WrappedVerifiableCredential[] = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(
-      verifiableCredentials,
-      this.options?.hasher,
-    );
+    const wrappedVerifiableCredentials: WrappedVerifiableCredential[] =
+      SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(verifiableCredentials);
 
     // TODO:  So we have state in the form of this property which is set in the constructor, but we are overwriting it here. We need to retrhink how to instantiate PEX
     this._evaluationClientWrapper = new EvaluationClientWrapper();
@@ -234,11 +232,7 @@ export class PEX {
     const pd: IInternalPresentationDefinition = SSITypesBuilder.toInternalPresentationDefinition(presentationDefinition);
     // TODO:  So we have state in the form of this property which is set in the constructor, but we are overwriting it here. We need to retrhink how to instantiate PEX
     this._evaluationClientWrapper = new EvaluationClientWrapper();
-    return this._evaluationClientWrapper.selectFrom(
-      pd,
-      SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(verifiableCredentialCopy, this.options?.hasher),
-      opts,
-    );
+    return this._evaluationClientWrapper.selectFrom(pd, SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(verifiableCredentialCopy), opts);
   }
 
   public presentationSubmissionFrom(
@@ -255,11 +249,7 @@ export class PEX {
     },
   ): PresentationSubmission {
     const pd: IInternalPresentationDefinition = SSITypesBuilder.toInternalPresentationDefinition(presentationDefinition);
-    return this._evaluationClientWrapper.submissionFrom(
-      pd,
-      SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(selectedCredentials, this.options?.hasher),
-      opts,
-    );
+    return this._evaluationClientWrapper.submissionFrom(pd, SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(selectedCredentials), opts);
   }
 
   /**
@@ -294,7 +284,6 @@ export class PEX {
       ...opts,
       // We only pass in the submission in case it needs to be included in the presentation
       presentationSubmission: presentationSubmissionLocation === PresentationSubmissionLocation.PRESENTATION ? presentationSubmission : undefined,
-      hasher: this.options?.hasher,
     });
     this.updateSdJwtCredentials(presentations);
     return {
@@ -320,13 +309,8 @@ export class PEX {
       throw Error(`At least a verifiable credential needs to be passed in to create a presentation`);
     }
     const verifiableCredential = (Array.isArray(selectedCredentials) ? selectedCredentials : [selectedCredentials]) as W3CVerifiableCredential[];
-    if (verifiableCredential.some((c) => CredentialMapper.isSdJwtDecodedCredential(c) || CredentialMapper.isSdJwtEncoded(c))) {
-      if (!this.options?.hasher) {
-        throw new Error('Hasher must be provided when creating a presentation with an SD-JWT VC');
-      }
-    }
 
-    const wVCs = verifiableCredential.map((vc) => CredentialMapper.toWrappedVerifiableCredential(vc, { hasher: this.options?.hasher }));
+    const wVCs = verifiableCredential.map((vc) => CredentialMapper.toWrappedVerifiableCredential(vc));
     const holders = Array.from(new Set(wVCs.flatMap((wvc) => getSubjectIdsAsString(wvc.credential as ICredential))));
     const holder = opts?.holderDID ?? (holders.length === 1 ? holders[0] : undefined);
 
@@ -371,7 +355,7 @@ export class PEX {
         if (CredentialMapper.isSdJwtDecodedCredential(vc)) {
           result.push(vc as PartialSdJwtDecodedVerifiableCredential);
         } else if (CredentialMapper.isSdJwtEncoded(vc)) {
-          const decoded = CredentialMapper.decodeVerifiableCredential(vc, opts?.hasher);
+          const decoded = CredentialMapper.decodeVerifiableCredential(vc);
           result.push(decoded as PartialSdJwtDecodedVerifiableCredential);
         } else {
           // This should be jwt or json-ld
@@ -586,13 +570,10 @@ export class PEX {
       // Select type without kbJwt as isSdJwtDecodedCredential and won't accept the partial sdvc type
       if (CredentialMapper.isSdJwtDecodedCredential(presentation as SdJwtDecodedVerifiableCredential)) {
         const sdJwtCredential = presentation as SdJwtDecodedVerifiableCredential;
-        if (!this.options?.hasher) {
-          throw new Error('Hasher must be provided when creating a presentation with an SD-JWT VC');
-        }
 
         // extract sd_alg or default to sha-256
         const hashAlg = sdJwtCredential.signedPayload._sd_alg ?? 'sha-256';
-        const sdHash = calculateSdHash(sdJwtCredential.compactSdJwtVc, hashAlg, this.options.hasher);
+        const sdHash = calculateSdHash(sdJwtCredential.compactSdJwtVc, hashAlg);
 
         const kbJwt = {
           // alg MUST be set by the signer
