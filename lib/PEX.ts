@@ -328,11 +328,6 @@ export class PEX {
 
     const wVCs = verifiableCredential.map((vc) => CredentialMapper.toWrappedVerifiableCredential(vc, { hasher: this.options?.hasher }));
     const holders = Array.from(new Set(wVCs.flatMap((wvc) => getSubjectIdsAsString(wvc.credential as ICredential))));
-    if (holders.length !== 1 && !opts?.holderDID) {
-      console.log(
-        `We deduced ${holders.length} subject from ${wVCs.length} Verifiable Credentials, and no holder property was given. This might lead to undesired results`,
-      );
-    }
     const holder = opts?.holderDID ?? (holders.length === 1 ? holders[0] : undefined);
 
     const type = opts?.basePresentationPayload?.type
