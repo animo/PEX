@@ -177,7 +177,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
               // For literal values, just set the path to true
               JsonPathUtils.setValue(presentationFrame, selectedField.path, true);
             }
-          } else {
+          } else if (!('optional' in field && field.optional)) {
             this.createMandatoryFieldNotFoundResult(inputDescriptorIndex, vcIndex, field.path);
             return undefined;
           }
@@ -203,7 +203,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
           const inputField = JsonPathUtils.extractInputField(vc, field.path);
           if (inputField.length > 0) {
             credentialToSend = this.copyResultPathToDestinationCredential(inputField[0], vc, credentialToSend);
-          } else {
+          } else if (!('optional' in field && field.optional)) {
             this.createMandatoryFieldNotFoundResult(inputDescriptorIndex, vcIndex, field.path);
             return undefined;
           }

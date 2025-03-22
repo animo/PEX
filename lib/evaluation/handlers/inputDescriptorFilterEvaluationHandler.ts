@@ -56,13 +56,20 @@ export class InputDescriptorFilterEvaluationHandler extends AbstractEvaluationHa
             });
           }
         }
+
+        const isOptional = 'optional' in field.value && field.value.optional;
+
         if (!resultFound) {
-          if (!inputField.length) {
+          if (inputField.length) {
+            const payload = { result: { ...inputField[0] }, valid: false, format: wvc.format };
+            this.createResponse(field, vcIndex, payload, PexMessages.INPUT_CANDIDATE_FAILED_FILTER_EVALUATION);
+          } else if (!isOptional) {
             const payload = { valid: false, format: wvc.format };
             this.createResponse(field, vcIndex, payload, PexMessages.INPUT_CANDIDATE_DOESNT_CONTAIN_PROPERTY);
           } else {
-            const payload = { result: { ...inputField[0] }, valid: false, format: wvc.format };
-            this.createResponse(field, vcIndex, payload, PexMessages.INPUT_CANDIDATE_FAILED_FILTER_EVALUATION);
+            this.getResults().push({
+              ...this.createResultObject(jp.stringify(field.path.slice(0, 3)), vcIndex, { result: undefined, valid: true, format: wvc.format }),
+            });
           }
         }
       });
