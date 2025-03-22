@@ -81,12 +81,8 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
   private evaluateLimitDisclosure(inputDescriptors: Array<InputDescriptorV2 | InputDescriptorV1>, wrappedVcs: WrappedVerifiableCredential[]): void {
     wrappedVcs.forEach((wvc, vcIndex) => {
       const eligibleInputDescriptors = eligibleInputDescriptorsForWrappedVc(inputDescriptors, vcIndex, this.getResults());
-      const includeLimitDisclosure = eligibleInputDescriptors.some(
-        ({ inputDescriptor: { constraints } }) =>
-          constraints?.limit_disclosure === Optionality.Preferred || constraints?.limit_disclosure === Optionality.Required,
-      );
 
-      if (eligibleInputDescriptors.length > 0 && includeLimitDisclosure && this.isLimitDisclosureSupported(eligibleInputDescriptors, wvc, vcIndex)) {
+      if (eligibleInputDescriptors.length > 0 && this.isLimitDisclosureSupported(eligibleInputDescriptors, wvc, vcIndex)) {
         this.enforceLimitDisclosure(wrappedVcs, eligibleInputDescriptors, vcIndex);
       }
     });
@@ -237,7 +233,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
       input_descriptor_path: `$.input_descriptors[${idIdx}]`,
       verifiable_credential_path: `${path}`,
       evaluator: this.getName(),
-      status: limitDisclosure === Optionality.Required ? Status.INFO : Status.WARN,
+      status: limitDisclosure === Optionality.Required || limitDisclosure === Optionality.Preferred ? Status.INFO : Status.WARN,
       message: PexMessages.LIMIT_DISCLOSURE_APPLIED,
       payload: undefined,
     });

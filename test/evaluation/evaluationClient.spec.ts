@@ -139,7 +139,7 @@ describe('evaluate', () => {
     const wvcs = SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs([
       vpSimple.verifiableCredential![0],
     ]) as WrappedW3CVerifiableCredential[];
-    evaluationClient.evaluate(pd, wvcs, { holderDIDs: HOLDER_DID, limitDisclosureSignatureSuites: LIMIT_DISCLOSURE_SIGNATURE_SUITES });
+    evaluationClient.evaluate(pd, wvcs, { holderDIDs: HOLDER_DID, limitDisclosureSignatureSuites: [] });
     const firstWrappedVc = evaluationClient.wrappedVcs[0] as WrappedW3CVerifiableCredential;
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toEqual('etc');
   });

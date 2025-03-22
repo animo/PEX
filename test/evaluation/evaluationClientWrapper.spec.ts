@@ -169,7 +169,8 @@ describe('evaluate', () => {
     const evaluationResults = evaluationClientWrapper.evaluate(
       pd,
       SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs([vpSimple.verifiableCredential![0]]),
-      { holderDIDs: evaluationClientWrapperData.getHolderDID(), limitDisclosureSignatureSuites: LIMIT_DISCLOSURE_SIGNATURE_SUITES },
+      // no limit disclosure signature suite
+      { holderDIDs: evaluationClientWrapperData.getHolderDID(), limitDisclosureSignatureSuites: [] },
     );
     const firstWrappedVc = evaluationClient.wrappedVcs[0] as WrappedW3CVerifiableCredential;
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toEqual('etc');
@@ -178,7 +179,7 @@ describe('evaluate', () => {
     expect(evaluationResults.warnings?.length).toEqual(0);
   });
 
-  it('should return warn if limit_disclosure deletes the etc field', function () {
+  it('should return info if limit_disclosure deletes the etc field', function () {
     const pdSchema: InternalPresentationDefinitionV1 = getFileAsJson(
       './test/dif_pe_examples/pdV1/pd-simple-schema-age-predicate.json',
     ).presentation_definition;
@@ -196,7 +197,7 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toBeUndefined();
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getWarn().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings).toEqual(evaluationClientWrapperData.getWarn().warnings);
+    expect(evaluationResults.warnings).toEqual([]);
   });
 
   it("should return ok if vc[0] doesn't have the birthPlace field", function () {

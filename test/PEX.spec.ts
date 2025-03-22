@@ -209,7 +209,23 @@ describe('evaluate', () => {
       areRequiredCredentialsPresent: Status.INFO,
       presentations: vps,
       errors: [],
-      warnings: [],
+      warnings: [
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[0]: $.verifiableCredential[0]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[1]: $.verifiableCredential[1]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[2]: $.verifiableCredential[3]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+      ],
       value: {
         id: expect.any(String),
         definition_id: '31e2f0f1-6b70-411d-b239-56aed5321884',
@@ -367,7 +383,33 @@ describe('evaluate', () => {
       areRequiredCredentialsPresent: Status.INFO,
       presentations: vps,
       errors: [],
-      warnings: [],
+      warnings: [
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[1]: $.verifiableCredential[0]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[0]: $.verifiableCredential[1]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[0]: $.verifiableCredential[2]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[1]: $.verifiableCredential[3]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+        {
+          message: 'added variable in the limit_disclosure to the verifiableCredential: $.input_descriptors[2]: $.verifiableCredential[5]',
+          status: 'warn',
+          tag: 'LimitDisclosureEvaluation',
+        },
+      ],
       // Should return the same presentation submission if provided
       value: {
         id: expect.any(String),
