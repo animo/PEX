@@ -386,7 +386,6 @@ export class EvaluationClientWrapper {
 
     const wrappedPresentations = Array.isArray(wvps) ? wvps : [wvps];
     const allWvcs = wrappedPresentations.reduce((all, wvp) => [...all, ...wvp.vcs], [] as WrappedVerifiableCredential[]);
-
     const result: PresentationEvaluationResults = {
       areRequiredCredentialsPresent: Status.INFO,
       presentations: Array.isArray(wvps) ? wvps.map((wvp) => wvp.original) : [wvps.original],
@@ -435,7 +434,14 @@ export class EvaluationClientWrapper {
       this.updatePresentationSubmissionPathToVpPath(result.value);
     }
 
-    result.areRequiredCredentialsPresent = result.value?.descriptor_map?.length ? Status.INFO : Status.ERROR;
+    // PEX does some really weird stuff with filtering of submission. So we validate the generated submission
+    // agains the presentation to make sure it is valid
+    if (!result.value) {
+      result.areRequiredCredentialsPresent = Status.ERROR;
+    } else {
+      const submissionAgainstDefinitionResult = this.validateIfSubmissionSatisfiesDefinition(pd, result.value);
+      result.areRequiredCredentialsPresent = submissionAgainstDefinitionResult.doesSubmissionSatisfyDefinition ? Status.INFO : Status.ERROR;
+    }
 
     return result;
   }
