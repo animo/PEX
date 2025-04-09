@@ -1,10 +1,11 @@
 import { Format, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models';
-import { CredentialMapper, IPresentation, OriginalVerifiableCredential, OriginalVerifiablePresentation } from '@sphereon/ssi-types';
+import { IPresentation } from '@sphereon/ssi-types';
 
 import { PEX } from './PEX';
 import { EvaluationClientWrapper, EvaluationResults, PresentationEvaluationResults, SelectResults } from './evaluation';
 import { PresentationFromOpts, PresentationResult, PresentationSubmissionLocation } from './signing';
 import { SSITypesBuilder } from './types';
+import { OriginalVerifiableCredential, OriginalVerifiablePresentation, PexCredentialMapper } from './types/PexCredentialMapper';
 import { PresentationDefinitionV2VB, Validated, ValidationEngine } from './validation';
 
 /**
@@ -109,7 +110,9 @@ export class PEXv2 extends PEX {
       SSITypesBuilder.mapExternalVerifiableCredentialsToWrappedVcs(selectedCredentials),
       opts,
     );
-    const hasSdJwtCredentials = selectedCredentials.some((c) => CredentialMapper.isSdJwtDecodedCredential(c) || CredentialMapper.isSdJwtEncoded(c));
+    const hasSdJwtCredentials = selectedCredentials.some(
+      (c) => PexCredentialMapper.isSdJwtDecodedCredential(c) || PexCredentialMapper.isSdJwtEncoded(c),
+    );
 
     // We could include it in the KB-JWT? Not sure if we want that
     if (opts?.presentationSubmissionLocation === PresentationSubmissionLocation.PRESENTATION && hasSdJwtCredentials) {

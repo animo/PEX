@@ -5,7 +5,6 @@ import {
   IProof,
   IProofPurpose,
   IProofType,
-  OriginalVerifiableCredential,
   SdJwtDecodedVerifiableCredential,
   SdJwtVcKbJwtHeader,
   SdJwtVcKbJwtPayload,
@@ -13,6 +12,7 @@ import {
 } from '@sphereon/ssi-types';
 
 import { PresentationEvaluationResults } from '../evaluation';
+import { OriginalVerifiableCredential } from '../types/PexCredentialMapper';
 
 export interface ProofOptions {
   /**

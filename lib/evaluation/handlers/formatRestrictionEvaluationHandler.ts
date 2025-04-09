@@ -1,8 +1,7 @@
-import { WrappedVerifiableCredential } from '@sphereon/ssi-types';
-
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV1, InternalPresentationDefinitionV2 } from '../../types';
 import PexMessages from '../../types/Messages';
+import { WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
 
@@ -31,7 +30,7 @@ export class FormatRestrictionEvaluationHandler extends AbstractEvaluationHandle
 
         if (allowedFormats.includes(wvc.format)) {
           // According to 18013-7 the docType MUST match the input descriptor ID
-          if (wvc.format === 'mso_mdoc' && wvc.credential.docType.asStr !== _inputDescriptor.id) {
+          if (wvc.format === 'mso_mdoc' && wvc.credential.docType !== _inputDescriptor.id) {
             this.getResults().push(this.generateInputDescriptorIdDoctypeErrorResult(index, `$[${vcIndex}]`, wvc));
           }
 

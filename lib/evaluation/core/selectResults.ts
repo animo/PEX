@@ -1,6 +1,5 @@
-import { OriginalVerifiableCredential } from '@sphereon/ssi-types';
-
 import { Checked, Status } from '../../ConstraintUtils';
+import { OriginalVerifiableCredential } from '../../types/PexCredentialMapper';
 
 import { SubmissionRequirementMatch } from './submissionRequirementMatch';
 

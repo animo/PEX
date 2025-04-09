@@ -4,14 +4,7 @@ import {
   PresentationDefinitionV1,
   PresentationDefinitionV2,
 } from '@sphereon/pex-models';
-import {
-  CredentialMapper,
-  JwtDecodedVerifiablePresentation,
-  OriginalVerifiableCredential,
-  OriginalVerifiablePresentation,
-  WrappedVerifiableCredential,
-  WrappedVerifiablePresentation,
-} from '@sphereon/ssi-types';
+import { JwtDecodedVerifiablePresentation } from '@sphereon/ssi-types';
 
 import { definitionVersionDiscovery, JsonPathUtils } from '../utils';
 
@@ -23,6 +16,13 @@ import {
   IPresentationDefinition,
   PEVersion,
 } from './Internal.types';
+import {
+  OriginalVerifiableCredential,
+  OriginalVerifiablePresentation,
+  PexCredentialMapper,
+  WrappedVerifiableCredential,
+  WrappedVerifiablePresentation,
+} from './PexCredentialMapper';
 
 export class SSITypesBuilder {
   public static modelEntityToInternalPresentationDefinitionV1(p: PdV1): InternalPresentationDefinitionV1 {
@@ -46,16 +46,15 @@ export class SSITypesBuilder {
   static mapExternalVerifiablePresentationToWrappedVP(
     presentation: OriginalVerifiablePresentation | JwtDecodedVerifiablePresentation,
   ): WrappedVerifiablePresentation {
-    return CredentialMapper.toWrappedVerifiablePresentation(presentation);
+    return PexCredentialMapper.toWrappedVerifiablePresentation(presentation);
   }
 
   static mapExternalVerifiableCredentialsToWrappedVcs(
     verifiableCredentials: OriginalVerifiableCredential | OriginalVerifiableCredential[],
   ): WrappedVerifiableCredential[] {
-    return CredentialMapper.toWrappedVerifiableCredentials(
-      Array.isArray(verifiableCredentials) ? verifiableCredentials : [verifiableCredentials],
-      {},
-    );
+    const array = Array.isArray(verifiableCredentials) ? verifiableCredentials : [verifiableCredentials];
+
+    return array.map((c) => PexCredentialMapper.toWrappedVerifiableCredential(c));
   }
 
   static toInternalPresentationDefinition(presentationDefinition: IPresentationDefinition): IInternalPresentationDefinition {

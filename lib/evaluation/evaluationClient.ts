@@ -1,9 +1,10 @@
 import { Format, PresentationSubmission } from '@sphereon/pex-models';
-import { IProofType, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { IProofType } from '@sphereon/ssi-types';
 
 import { Status } from '../ConstraintUtils';
 import { IInternalPresentationDefinition } from '../types';
 import PexMessages from '../types/Messages';
+import { WrappedVerifiableCredential } from '../types/PexCredentialMapper';
 import { filterToRestrictedDIDs, uniformDIDMethods } from '../utils';
 
 import { HandlerCheckResult } from './core';

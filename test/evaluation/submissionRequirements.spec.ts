@@ -1,11 +1,12 @@
 import fs from 'fs';
 
 import { PresentationSubmission } from '@sphereon/pex-models';
-import { IVerifiablePresentation, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { IVerifiablePresentation } from '@sphereon/ssi-types';
 
 import { EvaluationClientWrapper } from '../../lib/evaluation';
 import { InternalPresentationDefinitionV1 } from '../../lib/types';
 import { SSITypesBuilder } from '../../lib/types';
+import { WrappedVerifiableCredential } from '../../lib/types/PexCredentialMapper';
 
 function getFile(path: string) {
   return JSON.parse(fs.readFileSync(path, 'utf-8'));

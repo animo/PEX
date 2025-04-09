@@ -1,19 +1,18 @@
 import { InputDescriptorV1, InputDescriptorV2, Optionality } from '@sphereon/pex-models';
 import {
   AdditionalClaims,
-  CredentialMapper,
   ICredential,
   ICredentialSubject,
   IVerifiableCredential,
   SdJwtDecodedVerifiableCredential,
   SdJwtPresentationFrame,
-  WrappedVerifiableCredential,
 } from '@sphereon/ssi-types';
 
 import { ClaimValue } from '../../../test/types';
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InputDescriptorWithIndex, PathComponent } from '../../types';
 import PexMessages from '../../types/Messages';
+import { PexCredentialMapper, WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { applySdJwtLimitDisclosure, JsonPathUtils } from '../../utils';
 import { EvaluationClient } from '../evaluationClient';
 
@@ -91,7 +90,7 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
   private enforceLimitDisclosure(wrappedVcs: WrappedVerifiableCredential[], eligibleInputDescriptors: InputDescriptorWithIndex[], vcIndex: number) {
     const wvc = wrappedVcs[vcIndex];
 
-    if (CredentialMapper.isWrappedSdJwtVerifiableCredential(wvc)) {
+    if (PexCredentialMapper.isWrappedSdJwtVerifiableCredential(wvc)) {
       const presentationFrame = this.createSdJwtPresentationFrame(eligibleInputDescriptors, wvc.credential, vcIndex);
 
       // We update the SD-JWT to it's presentation format (remove disclosures, update pretty payload, etc..), except
@@ -101,17 +100,17 @@ export class LimitDisclosureEvaluationHandler extends AbstractEvaluationHandler 
         wvc.decoded = wvc.credential.decodedPayload;
         // We need to overwrite the original, as that is returned in the selectFrom method
         // But we also want to keep the format of the original credential.
-        wvc.original = CredentialMapper.isSdJwtDecodedCredential(wvc.original) ? wvc.credential : wvc.credential.compactSdJwtVc;
+        wvc.original = PexCredentialMapper.isSdJwtDecodedCredential(wvc.original) ? wvc.credential : wvc.credential.compactSdJwtVc;
 
         for (const { inputDescriptorIndex, inputDescriptor } of eligibleInputDescriptors) {
           this.createSuccessResult(inputDescriptorIndex, `$[${vcIndex}]`, inputDescriptor.constraints?.limit_disclosure);
         }
       }
-    } else if (CredentialMapper.isWrappedMdocCredential(wvc)) {
+    } else if (PexCredentialMapper.isWrappedMdocCredential(wvc)) {
       for (const { inputDescriptorIndex, inputDescriptor } of eligibleInputDescriptors) {
         this.createSuccessResult(inputDescriptorIndex, `$[${vcIndex}]`, inputDescriptor.constraints?.limit_disclosure);
       }
-    } else if (CredentialMapper.isWrappedW3CVerifiableCredential(wvc)) {
+    } else if (PexCredentialMapper.isWrappedW3CVerifiableCredential(wvc)) {
       const internalCredentialToSend = this.createVcWithRequiredFields(eligibleInputDescriptors, wvc.credential, vcIndex);
       /* When verifiableCredentialToSend is null/undefined an error is raised, the credential will
        * remain untouched and the verifiable credential won't be submitted.

@@ -1,9 +1,10 @@
 import { JSONPath as jp } from '@astronautlabs/jsonpath';
 import { HolderSubject, Optionality } from '@sphereon/pex-models';
-import { ICredentialSubject, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { ICredentialSubject } from '@sphereon/ssi-types';
 
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, PathComponent } from '../../types';
+import { WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
 

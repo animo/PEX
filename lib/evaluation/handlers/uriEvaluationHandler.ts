@@ -1,19 +1,13 @@
+import { IssuerSignedDocument } from '@animo-id/mdoc';
 import { JSONPath as jp } from '@astronautlabs/jsonpath';
 import { Descriptor, InputDescriptorV1, InputDescriptorV2 } from '@sphereon/pex-models';
-import {
-  CredentialMapper,
-  ICredential,
-  ICredentialSchema,
-  MdocDocument,
-  OriginalType,
-  SdJwtDecodedVerifiableCredential,
-  WrappedVerifiableCredential,
-} from '@sphereon/ssi-types';
+import { ICredential, ICredentialSchema, OriginalType, SdJwtDecodedVerifiableCredential } from '@sphereon/ssi-types';
 import { nanoid } from 'nanoid';
 
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV1, PEVersion } from '../../types';
 import PexMessages from '../../types/Messages';
+import { PexCredentialMapper, WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
 
@@ -126,11 +120,11 @@ export class UriEvaluationHandler extends AbstractEvaluationHandler {
     }
   }
 
-  private static buildVcContextAndSchemaUris(credential: ICredential | SdJwtDecodedVerifiableCredential | MdocDocument, version: PEVersion) {
+  private static buildVcContextAndSchemaUris(credential: ICredential | SdJwtDecodedVerifiableCredential | IssuerSignedDocument, version: PEVersion) {
     const uris: string[] = [];
 
     // W3C credential
-    if (CredentialMapper.isW3cCredential(credential)) {
+    if (PexCredentialMapper.isW3cCredential(credential)) {
       if (Array.isArray(credential['@context'])) {
         credential['@context'].forEach((value) => uris.push(value as string));
       } else {
@@ -154,7 +148,7 @@ export class UriEvaluationHandler extends AbstractEvaluationHandler {
     // NOTE: we add the `vct` field of an SD-JWT to the list of uris, to allow SD-JWT
     // to work with PEX v1 in the same way that JWT vcs can work with pex v1. If we don't
     // add this, then SD-JWTs can only be used with PEX v2.
-    if (CredentialMapper.isSdJwtDecodedCredential(credential)) {
+    if (PexCredentialMapper.isSdJwtDecodedCredential(credential)) {
       if (version === PEVersion.v1) {
         uris.push(credential.decodedPayload.vct);
       }
@@ -174,8 +168,8 @@ export class UriEvaluationHandler extends AbstractEvaluationHandler {
     result.message = PexMessages.URI_EVALUATION_PASSED;
     result.payload = {
       format: wvc.format,
-      vcContext: CredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential['@context'] : undefined,
-      vcCredentialSchema: CredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential.credentialSchema : undefined,
+      vcContext: PexCredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential['@context'] : undefined,
+      vcCredentialSchema: PexCredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential.credentialSchema : undefined,
       inputDescriptorsUris,
     };
     return result;
@@ -192,8 +186,8 @@ export class UriEvaluationHandler extends AbstractEvaluationHandler {
     result.message = PexMessages.URI_EVALUATION_DIDNT_PASS;
     result.payload = {
       format: wvc.format,
-      vcContext: CredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential['@context'] : undefined,
-      vcCredentialSchema: CredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential.credentialSchema : undefined,
+      vcContext: PexCredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential['@context'] : undefined,
+      vcCredentialSchema: PexCredentialMapper.isW3cCredential(wvc.credential) ? wvc.credential.credentialSchema : undefined,
       inputDescriptorsUris,
     };
     return result;

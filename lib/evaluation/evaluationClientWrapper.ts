@@ -1,16 +1,7 @@
 import { JSONPath as jp } from '@astronautlabs/jsonpath';
 import { Descriptor, Format, InputDescriptorV1, InputDescriptorV2, PresentationSubmission, Rules } from '@sphereon/pex-models';
 import type { SubmissionRequirement } from '@sphereon/pex-models';
-import {
-  CredentialMapper,
-  IVerifiableCredential,
-  IVerifiablePresentation,
-  OriginalVerifiableCredential,
-  SdJwtDecodedVerifiableCredential,
-  WrappedMdocCredential,
-  WrappedVerifiableCredential,
-  WrappedVerifiablePresentation,
-} from '@sphereon/ssi-types';
+import { IVerifiableCredential, IVerifiablePresentation, SdJwtDecodedVerifiableCredential } from '@sphereon/ssi-types';
 
 import { Checked, Status } from '../ConstraintUtils';
 import { PresentationSubmissionLocation } from '../signing';
@@ -21,6 +12,13 @@ import {
   IPresentationDefinition,
   OrArray,
 } from '../types';
+import {
+  OriginalVerifiableCredential,
+  PexCredentialMapper,
+  WrappedMdocCredential,
+  WrappedVerifiableCredential,
+  WrappedVerifiablePresentation,
+} from '../types/PexCredentialMapper';
 import { JsonPathUtils } from '../utils';
 import { getVpFormatForVcFormat } from '../utils/formatMap';
 
@@ -468,7 +466,7 @@ export class EvaluationClientWrapper {
     }
 
     // FIXME figure out possible types, can't see that in debug mode...
-    const isCredential = CredentialMapper.isCredential(vcResult.value as OriginalVerifiableCredential);
+    const isCredential = PexCredentialMapper.isCredential(vcResult.value as OriginalVerifiableCredential);
     if (
       !vcResult.value ||
       (typeof vcResult.value === 'string' && !isCredential) ||
@@ -505,7 +503,7 @@ export class EvaluationClientWrapper {
     }
 
     // Find the corresponding Wrapped Verifiable Credential (wvc) based on the original VC
-    const wvc = wvp.vcs.find((wrappedVc) => CredentialMapper.areOriginalVerifiableCredentialsEqual(wrappedVc.original, originalVc));
+    const wvc = wvp.vcs.find((wrappedVc) => PexCredentialMapper.areOriginalVerifiableCredentialsEqual(wrappedVc.original, originalVc));
 
     if (!wvc) {
       return {
@@ -555,7 +553,7 @@ export class EvaluationClientWrapper {
     // If only a single VP is passed that is not w3c and no presentationSubmissionLocation, we set the default location to presentation. Otherwise we assume it's external
     const presentationSubmissionLocation =
       opts?.presentationSubmissionLocation ??
-      (Array.isArray(wvps) || !CredentialMapper.isW3cPresentation(Array.isArray(wvps) ? wvps[0].presentation : wvps.presentation)
+      (Array.isArray(wvps) || !PexCredentialMapper.isW3cPresentation(Array.isArray(wvps) ? wvps[0].presentation : wvps.presentation)
         ? PresentationSubmissionLocation.EXTERNAL
         : PresentationSubmissionLocation.PRESENTATION);
 
@@ -651,10 +649,10 @@ export class EvaluationClientWrapper {
           const vcs = matchingVp.vcs as WrappedMdocCredential[];
           vcPath += ` with nested mdoc with doctype ${descriptor.id}`;
 
-          const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType.asStr);
+          const matchingVc = vcs.find((vc) => descriptor.id === vc.credential.docType);
 
           if (!matchingVc) {
-            const allDoctypes = vcs.map((vc) => `'${vc.credential.docType.asStr}'`).join(', ');
+            const allDoctypes = vcs.map((vc) => `'${vc.credential.docType}'`).join(', ');
             result.areRequiredCredentialsPresent = Status.ERROR;
             result.errors?.push({
               status: Status.ERROR,
@@ -691,7 +689,7 @@ export class EvaluationClientWrapper {
 
       // Determine holder DIDs
       const holderDIDs =
-        CredentialMapper.isW3cPresentation(matchingVp.presentation) && matchingVp.presentation.holder
+        PexCredentialMapper.isW3cPresentation(matchingVp.presentation) && matchingVp.presentation.holder
           ? [matchingVp.presentation.holder]
           : opts?.holderDIDs || [];
 

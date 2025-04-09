@@ -7,7 +7,6 @@ import {
   IProof,
   IVerifiableCredential,
   IVerifiablePresentation,
-  WrappedVerifiableCredential,
   WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types';
 
@@ -15,6 +14,7 @@ import { Status } from '../../lib';
 import { EvaluationClient } from '../../lib/evaluation';
 import { InternalPresentationDefinitionV1, SSITypesBuilder } from '../../lib/types';
 import PexMessages from '../../lib/types/Messages';
+import { WrappedVerifiableCredential } from '../../lib/types/PexCredentialMapper';
 import { LimitDisclosureEvaluationResults } from '../test_data/limitDisclosureEvaluation/limitDisclosureEvaluationResults';
 import { PdMultiCredentials } from '../test_data/limitDisclosureEvaluation/pdMultiCredentials';
 import { VcMultiCredentials } from '../test_data/limitDisclosureEvaluation/vcMultiCredentials';
