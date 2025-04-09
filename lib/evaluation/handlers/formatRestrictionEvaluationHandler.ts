@@ -28,7 +28,13 @@ export class FormatRestrictionEvaluationHandler extends AbstractEvaluationHandle
           // Take the instersection, as an argument has been supplied for restrictions
           allowedFormats = Object.keys(_inputDescriptor.format).filter((k) => restrictToFormats.includes(k));
         }
+
         if (allowedFormats.includes(wvc.format)) {
+          // According to 18013-7 the docType MUST match the input descriptor ID
+          if (wvc.format === 'mso_mdoc' && wvc.credential.docType.asStr !== _inputDescriptor.id) {
+            this.getResults().push(this.generateInputDescriptorIdDoctypeErrorResult(index, `$[${vcIndex}]`, wvc));
+          }
+
           this.getResults().push(
             this.generateSuccessResult(index, `$[${vcIndex}]`, wvc, `${wvc.format} is allowed from ${JSON.stringify(allowedFormats)}`),
           );
@@ -39,6 +45,19 @@ export class FormatRestrictionEvaluationHandler extends AbstractEvaluationHandle
     });
 
     this.updatePresentationSubmission(pd);
+  }
+
+  private generateInputDescriptorIdDoctypeErrorResult(idIdx: number, vcPath: string, wvc: WrappedVerifiableCredential): HandlerCheckResult {
+    return {
+      input_descriptor_path: `$.input_descriptors[${idIdx}]`,
+      evaluator: this.getName(),
+      status: Status.ERROR,
+      message: PexMessages.INPUT_DESCRIPTOR_ID_MATCHES_MDOC_DOCTYPE_DIDNT_PASS,
+      verifiable_credential_path: vcPath,
+      payload: {
+        format: wvc.format,
+      },
+    };
   }
 
   private generateErrorResult(idIdx: number, vcPath: string, wvc: WrappedVerifiableCredential): HandlerCheckResult {
