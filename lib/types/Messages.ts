@@ -10,6 +10,7 @@ enum PexMessages {
   SUBJECT_IS_ISSUER = 'subject is issuer',
   FORMAT_RESTRICTION_PASSED = 'the Credential format of the candidate inputs matches the required formats',
   FORMAT_RESTRICTION_DIDNT_PASS = "the Credential format of the candidate inputs didn't match the required formats",
+  INPUT_DESCRIPTOR_ID_MATCHES_MDOC_DOCTYPE_DIDNT_PASS = "the doctype of the mdoc credential didn't match the input descriptor id (ISO 18013-7).",
   URI_EVALUATION_PASSED = '@context URI(s) for the schema of the candidate input is equal to one of the input_descriptors object uri values.',
   URI_EVALUATION_DIDNT_PASS = '@context URI for the of the candidate input MUST be equal to one of the input_descriptors object uri values exactly.',
   UNKNOWN_EXCEPTION = 'unknown exception occurred: ',

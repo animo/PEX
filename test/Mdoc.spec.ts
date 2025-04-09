@@ -93,6 +93,27 @@ describe('evaluate mdoc', () => {
     expect(result.areRequiredCredentialsPresent).toBe('info');
   });
 
+  it.only('selectFrom with mso_mdoc format where input descriptor id does not match doctype', () => {
+    const pd = getPresentationDefinitionV2();
+    pd.input_descriptors[0].id = 'random';
+    const result = pex.selectFrom(pd, [mdocBase64UrlUniversity]);
+    expect(result.errors?.length).toEqual(2);
+    expect(result.errors).toEqual([
+      {
+        message:
+          "the doctype of the mdoc credential didn't match the input descriptor id (ISO 18013-7).: $.input_descriptors[0]: $.verifiableCredential[0]",
+        status: 'error',
+        tag: 'FormatRestrictionEvaluation',
+      },
+      {
+        message: 'The input candidate is not eligible for submission: $.input_descriptors[0]: $.verifiableCredential[0]',
+        status: 'error',
+        tag: 'MarkForSubmissionEvaluation',
+      },
+    ]);
+    expect(result.areRequiredCredentialsPresent).toBe('error');
+  });
+
   it('selectFrom with both mso_mdoc and vc+sd-jwt format encoded', () => {
     const result = pex.selectFrom(getPresentationDefinitionV2(true), [sdJwt, mdocBase64UrlUniversity]);
     expect(result.errors?.length).toEqual(0);
@@ -372,7 +393,7 @@ describe('evaluate mdoc', () => {
     expect(result.areRequiredCredentialsPresent).toEqual(Status.INFO);
   });
 
-  test.only('handles invalid response with multiple mdocs in a single device response without submission', async () => {
+  test('handles invalid response with multiple mdocs in a single device response without submission', async () => {
     const result = pex.evaluatePresentation(
       {
         id: 'random',
