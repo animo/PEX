@@ -90,6 +90,7 @@ export type WrappedVerifiableCredential = Exclude<_WrappedVerifiableCredential, 
 export type WrappedVerifiablePresentation = Exclude<_WrappedVerifiablePresentation, { format: 'mso_mdoc' }> | WrappedMdocPresentation;
 
 // NOTE: this is partial reimplementation of CredentialMapper from ssi-types to overwrite the
+// methods relying on Sphereon's mdoc implementation
 export class PexCredentialMapper {
   public static isMsoMdocDecodedPresentation(original: OriginalVerifiablePresentation): original is MDoc {
     return original instanceof MDoc;
