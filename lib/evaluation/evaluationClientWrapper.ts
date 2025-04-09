@@ -435,7 +435,7 @@ export class EvaluationClientWrapper {
     }
 
     // PEX does some really weird stuff with filtering of submission. So we validate the generated submission
-    // agains the presentation to make sure it is valid
+    // against the presentation to make sure it is valid
     if (!result.value) {
       result.areRequiredCredentialsPresent = Status.ERROR;
     } else {
