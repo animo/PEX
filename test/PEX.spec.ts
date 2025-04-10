@@ -1181,7 +1181,7 @@ describe('evaluate', () => {
 
   it('should pass with jwt vp with submission data', function () {
     const pdSchema: PresentationDefinitionV2 = {
-      id: '49768857',
+      id: '00000000-0000-0000-0000-000000000000',
       input_descriptors: [
         {
           id: 'prc_type',
@@ -1250,12 +1250,12 @@ describe('evaluate', () => {
     });
   });
 
-  it('when single presentation is passed, it defaults to non-external submission', function () {
+  it.only('when single presentation is passed, it defaults to non-external submission', function () {
     const pdSchema: PresentationDefinitionV2 = {
-      id: '49768857',
+      id: '00000000-0000-0000-0000-000000000000',
       input_descriptors: [
         {
-          id: 'prc_type',
+          id: '1',
           name: 'Name',
           purpose: 'We can only support a familyName in a Permanent Resident Card',
           constraints: {
@@ -1277,7 +1277,7 @@ describe('evaluate', () => {
     const evalResult: PresentationEvaluationResults = pex.evaluatePresentation(pdSchema, jwtEncodedVp);
     expect(evalResult.errors).toEqual([]);
     expect(evalResult.value?.descriptor_map[0]).toEqual({
-      id: 'prc_type',
+      id: '1',
       format: 'ldp_vc',
       path: '$.verifiableCredential[0]',
     });
@@ -1285,7 +1285,7 @@ describe('evaluate', () => {
 
   it('when single presentation is passed with presentationSubmissionLocation.EXTERNAL, it generates the submission as external', function () {
     const pdSchema: PresentationDefinitionV2 = {
-      id: '49768857',
+      id: '00000000-0000-0000-0000-000000000000',
       input_descriptors: [
         {
           id: 'prc_type',

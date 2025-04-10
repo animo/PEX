@@ -61,8 +61,8 @@ describe('evaluate', () => {
         '$.input_descriptors[0]',
         '$[0]',
         'PredicateRelatedFieldEvaluation',
-        Status.INFO,
-        PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
+        Status.WARN,
+        'Predicate is required but not applied',
         {
           path: ['$', 'credentialSubject', 'age'],
           value: 19,
@@ -107,7 +107,7 @@ describe('evaluate', () => {
       message: PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
       payload: {
         result: {
-          value: 19,
+          value: true,
           path: ['$', 'credentialSubject', 'age'],
         },
         valid: true,
@@ -174,11 +174,10 @@ describe('evaluate', () => {
     expect(evaluationClient.results.length).toEqual(2);
   });
 
-  it("should return ok if verifiableCredential's age value is matching the specification in the input descriptor", function () {
+  it('should return error if using non supported filter for predicate', function () {
     const presentationDefinition: InternalPresentationDefinitionV1 = getFile(
-      './test/dif_pe_examples/pdV1/pd-schema-multiple-constraints.json',
+      './test/dif_pe_examples/pdV1/pd-schema-invalid-predicates.json',
     ).presentation_definition;
-    presentationDefinition!.input_descriptors![0]!.constraints!.fields![0]!.predicate = Optionality.Preferred;
     const evaluationClient: EvaluationClient = new EvaluationClient();
     evaluationClient.presentationSubmission = {
       id: 'ftc3QsJT-gZ_JNKpusT-I',
@@ -246,37 +245,14 @@ describe('evaluate', () => {
     });
     const evaluationHandler = new PredicateRelatedFieldEvaluationHandler(evaluationClient);
     evaluationHandler.handle(presentationDefinition);
-    expect(evaluationClient.results[4]).toEqual(
-      new HandlerCheckResult(
-        '$.input_descriptors[0]',
-        '$[0]',
-        'PredicateRelatedFieldEvaluation',
-        Status.INFO,
-        PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
-        { value: true, path: ['$', 'credentialSubject', 'age'] },
-      ),
-    );
     expect(evaluationClient.results[5]).toEqual(
       new HandlerCheckResult(
         '$.input_descriptors[0]',
         '$[0]',
         'PredicateRelatedFieldEvaluation',
-        Status.INFO,
-        PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
+        Status.ERROR,
+        "Only 'number' and 'integer' predicate with 'minimum', 'exclusiveMinimum', 'maximum', or 'exclusiveMaximum' supported.",
         { value: 'eu', path: ['$', 'credentialSubject', 'details', 'citizenship', 0] },
-      ),
-    );
-    expect(evaluationClient.results[6]).toEqual(
-      new HandlerCheckResult(
-        '$.input_descriptors[0]',
-        '$[0]',
-        'PredicateRelatedFieldEvaluation',
-        Status.INFO,
-        PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
-        {
-          value: 'NLD',
-          path: ['$', 'credentialSubject', 'country', 0, 'abbr'],
-        },
       ),
     );
   });

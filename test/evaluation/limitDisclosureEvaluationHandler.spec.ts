@@ -70,7 +70,7 @@ describe('evaluate', () => {
     evaluationClient.evaluate(pd, wvcs, { holderDIDs: HOLDER_DID, limitDisclosureSignatureSuites: LIMIT_DISCLOSURE_SIGNATURE_SUITES });
     const firstWrappedVc = evaluationClient.wrappedVcs[0] as WrappedW3CVerifiableCredential;
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['birthPlace']).toEqual('Maarssen');
-    expect(evaluationClient.results[9]).toEqual({
+    expect(evaluationClient.results[5]).toEqual({
       evaluator: 'LimitDisclosureEvaluation',
       input_descriptor_path: '$.input_descriptors[0]',
       message: `${PexMessages.LIMIT_DISCLOSURE_NOT_SUPPORTED}. Signature suite 'limit disclosure unsupported' is not present in limitDisclosureSignatureSuites [BbsBlsSignatureProof2020]`,

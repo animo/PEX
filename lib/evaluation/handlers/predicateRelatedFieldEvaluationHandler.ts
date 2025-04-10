@@ -24,7 +24,7 @@ export class PredicateRelatedFieldEvaluationHandler extends AbstractEvaluationHa
         this.examinePredicateRelatedField(index, inDesc.constraints);
       }
     });
-    // this.updatePresentationSubmission(pdV1);
+    this.updatePresentationSubmission(pd);
   }
 
   private examinePredicateRelatedField(input_descriptor_idx: number, constraints: ConstraintsV1 | ConstraintsV2): void {
@@ -58,12 +58,37 @@ export class PredicateRelatedFieldEvaluationHandler extends AbstractEvaluationHa
       constraints.fields[fieldIdx].path &&
       constraints.fields[fieldIdx].path?.includes(this.concatenatePath(results[resultIdx].payload.result.path))
     ) {
+      const field = constraints.fields[fieldIdx];
       const evaluationResult = { ...results[resultIdx].payload.result };
-      const resultObject = this.createResultObject(input_descriptor_idx, resultIdx, evaluationResult, results);
-      if (constraints.fields[fieldIdx].predicate === Optionality.Required) {
+
+      // We only support number with minimum/maximum for predicate type
+      if (
+        (field.filter?.type !== 'number' && field.filter?.type !== 'integer') ||
+        (!field.filter.minimum && !field.filter.exclusiveMinimum && !field.filter.maximum && !field.filter.exclusiveMaximum)
+      ) {
+        results.push(
+          this.createErrorResultObject(
+            input_descriptor_idx,
+            resultIdx,
+            evaluationResult,
+            results,
+            "Only 'number' and 'integer' predicate with 'minimum', 'exclusiveMinimum', 'maximum', or 'exclusiveMaximum' supported.",
+          ),
+        );
+        return;
+      }
+
+      if (evaluationResult.value === true) {
+        const resultObject = this.createResultObject(input_descriptor_idx, resultIdx, evaluationResult, results);
         results.push(resultObject);
-      } else {
-        resultObject.payload['value'] = true;
+      } else if (field.predicate === Optionality.Required) {
+        const resultObject = this.createWarnResultObject(
+          input_descriptor_idx,
+          resultIdx,
+          evaluationResult,
+          results,
+          'Predicate is required but not applied',
+        );
         results.push(resultObject);
       }
     }
@@ -103,6 +128,40 @@ export class PredicateRelatedFieldEvaluationHandler extends AbstractEvaluationHa
       evaluator: this.getName(),
       status: Status.INFO,
       message: PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
+      payload: evaluationResult,
+    };
+  }
+
+  private createWarnResultObject(
+    input_descriptor_idx: number,
+    resultIdx: number,
+    evaluationResult: unknown,
+    results: HandlerCheckResult[],
+    message: string,
+  ): HandlerCheckResult {
+    return {
+      input_descriptor_path: `$.input_descriptors[${input_descriptor_idx}]`,
+      verifiable_credential_path: results[resultIdx].verifiable_credential_path,
+      evaluator: this.getName(),
+      status: Status.WARN,
+      message,
+      payload: evaluationResult,
+    };
+  }
+
+  private createErrorResultObject(
+    input_descriptor_idx: number,
+    resultIdx: number,
+    evaluationResult: unknown,
+    results: HandlerCheckResult[],
+    message: string,
+  ): HandlerCheckResult {
+    return {
+      input_descriptor_path: `$.input_descriptors[${input_descriptor_idx}]`,
+      verifiable_credential_path: results[resultIdx].verifiable_credential_path,
+      evaluator: this.getName(),
+      status: Status.ERROR,
+      message,
       payload: evaluationResult,
     };
   }

@@ -42,10 +42,13 @@ export class InputDescriptorFilterEvaluationHandler extends AbstractEvaluationHa
     wrappedVcs.forEach((wvc: WrappedVerifiableCredential, vcIndex: number) => {
       this.createNoFieldResults(pd, vcIndex, wvc);
       fields.forEach((field) => {
+        const isPredicate = field.value.predicate !== undefined;
+
         let inputField: { path: PathComponent[]; value: unknown }[] = [];
         if (field.value.path) {
           inputField = JsonPathUtils.extractInputField(wvc.decoded, field.value.path);
         }
+
         let resultFound = false;
         for (const inputFieldKey of inputField) {
           if (this.evaluateFilter(inputFieldKey, field.value)) {
@@ -53,6 +56,26 @@ export class InputDescriptorFilterEvaluationHandler extends AbstractEvaluationHa
             const payload = { result: { ...inputField[0] }, valid: true, format: wvc.format };
             this.getResults().push({
               ...this.createResultObject(jp.stringify(field.path.slice(0, 3)), vcIndex, payload),
+            });
+          } else if (
+            isPredicate &&
+            this.evaluateFilter(inputFieldKey, {
+              ...field.value,
+              filter: {
+                type: 'boolean',
+                const: true,
+              },
+            })
+          ) {
+            resultFound = true;
+            const payload = { result: { ...inputField[0] }, valid: true, format: wvc.format, predicate: true };
+            this.getResults().push({
+              ...this.createResultObject(
+                jp.stringify(field.path.slice(0, 3)),
+                vcIndex,
+                payload,
+                PexMessages.INPUT_CANDIDATE_PREDICATE_VALUE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
+              ),
             });
           }
         }
@@ -109,13 +132,13 @@ export class InputDescriptorFilterEvaluationHandler extends AbstractEvaluationHa
     });
   }
 
-  private createResultObject(path: string, vcIndex: number, payload: unknown): HandlerCheckResult {
+  private createResultObject(path: string, vcIndex: number, payload: unknown, message?: string): HandlerCheckResult {
     return {
       input_descriptor_path: path,
       verifiable_credential_path: `$[${vcIndex}]`,
       evaluator: this.getName(),
       status: Status.INFO,
-      message: PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
+      message: message ?? PexMessages.INPUT_CANDIDATE_IS_ELIGIBLE_FOR_PRESENTATION_SUBMISSION,
       payload,
     };
   }
