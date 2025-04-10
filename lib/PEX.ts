@@ -96,7 +96,7 @@ export class PEX {
       throw new Error('At least one presentation must be provided');
     }
 
-    let originalPresentationSubmission = opts?.presentationSubmission
+    let originalPresentationSubmission = opts?.presentationSubmission;
     const generatePresentationSubmission =
       opts?.generatePresentationSubmission !== undefined ? opts.generatePresentationSubmission : opts?.presentationSubmission === undefined;
     const pd: IInternalPresentationDefinition = SSITypesBuilder.toInternalPresentationDefinition(presentationDefinition);
@@ -123,7 +123,7 @@ export class PEX {
       const decoded = wrappedPresentations[0].decoded;
       if ('presentation_submission' in decoded) {
         presentationSubmission = JSON.parse(JSON.stringify(decoded.presentation_submission));
-        originalPresentationSubmission = decoded.presentation_submission
+        originalPresentationSubmission = decoded.presentation_submission;
       }
       if (!presentationSubmission) {
         throw Error(`Either a presentation submission as part of the VP or provided in options was expected`);
@@ -181,7 +181,7 @@ export class PEX {
 
     return {
       ...result,
-      value: originalPresentationSubmission ?? result.value
+      value: originalPresentationSubmission ?? result.value,
     };
   }
 
