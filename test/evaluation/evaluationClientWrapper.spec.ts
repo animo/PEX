@@ -48,7 +48,7 @@ describe('evaluate', () => {
     expect(evaluationClient.results[0]).toEqual(evaluationClientWrapperData.getInputDescriptorsDoesNotMatchResult0());
     expect(evaluationClient.results[6]).toEqual(evaluationClientWrapperData.getInputDescriptorsDoesNotMatchResult3());
     expect(evaluationResults.errors).toEqual(evaluationClientWrapperData.getError().errors);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it("should return ok if uri in vp matches at least one of input_descriptor's uris", function () {
@@ -69,7 +69,7 @@ describe('evaluate', () => {
     expect(errorResults.length).toEqual(0);
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it("should return error if uri in verifiableCredential doesn't match", function () {
@@ -91,7 +91,7 @@ describe('evaluate', () => {
     expect(evaluationClient.results[0]).toEqual(evaluationClientWrapperData.getUriInVerifiableCredentialDoesNotMatchResult0());
     expect(evaluationClient.results[6]).toEqual(evaluationClientWrapperData.getUriInVerifiableCredentialDoesNotMatchResult3());
     expect(evaluationResults.errors).toEqual(evaluationClientWrapperData.getError().errors);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it("should return error if all the uris in vp don't match at least one of input_descriptor's uris", function () {
@@ -113,7 +113,7 @@ describe('evaluate', () => {
     const errorResults = evaluationClient.results.filter((result) => result.status === Status.ERROR);
     expect(errorResults.length).toEqual(2);
     expect(evaluationResults.errors).toEqual(evaluationClientWrapperData.getError().errors);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it("should return ok if all the uris in vp match at least one of input_descriptor's uris", function () {
@@ -134,7 +134,7 @@ describe('evaluate', () => {
     expect(errorResults.length).toEqual(0);
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it('should return info if limit_disclosure deletes the etc field', function () {
@@ -154,7 +154,7 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toBeUndefined();
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors).toEqual(evaluationClientWrapperData.getSuccess().errors);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it('should return info if limit_disclosure does not delete the etc field', function () {
@@ -176,7 +176,7 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toEqual('etc');
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors).toEqual(evaluationClientWrapperData.getSuccess().errors);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it('should return info if limit_disclosure deletes the etc field', function () {
@@ -197,7 +197,13 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toBeUndefined();
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getWarn().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings).toEqual([]);
+    expect(evaluationResults.warnings).toEqual([
+      {
+        message: 'Predicate is required but not applied: $.input_descriptors[0]: $.verifiableCredential[0]',
+        status: 'warn',
+        tag: 'PredicateRelatedFieldEvaluation',
+      },
+    ]);
   });
 
   it("should return ok if vc[0] doesn't have the birthPlace field", function () {
@@ -218,7 +224,7 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['birthPlace']).toBeUndefined();
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it("should return ok if vc[0] doesn't have the etc field", function () {
@@ -239,7 +245,7 @@ describe('evaluate', () => {
     expect((firstWrappedVc.credential.credentialSubject as ICredentialSubject & AdditionalClaims)['etc']).toBeUndefined();
     expect(evaluationResults.value).toEqual(evaluationClientWrapperData.getSuccess().value);
     expect(evaluationResults.errors?.length).toEqual(0);
-    expect(evaluationResults.warnings?.length).toEqual(0);
+    expect(evaluationResults.warnings?.length).toEqual(1);
   });
 
   it('Evaluate submission requirements all rule', () => {

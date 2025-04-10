@@ -1,3 +1,5 @@
+import { FieldV2 } from '@sphereon/pex-models';
+
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV1, InternalPresentationDefinitionV2 } from '../../types';
 import PexMessages from '../../types/Messages';
@@ -30,8 +32,29 @@ export class FormatRestrictionEvaluationHandler extends AbstractEvaluationHandle
 
         if (allowedFormats.includes(wvc.format)) {
           // According to 18013-7 the docType MUST match the input descriptor ID
-          if (wvc.format === 'mso_mdoc' && wvc.credential.docType !== _inputDescriptor.id) {
-            this.getResults().push(this.generateInputDescriptorIdDoctypeErrorResult(index, `$[${vcIndex}]`, wvc));
+          if (wvc.format === 'mso_mdoc') {
+            if (wvc.credential.docType !== _inputDescriptor.id) {
+              this.getResults().push(
+                this.generateErrorResult(index, `$[${vcIndex}]`, wvc, PexMessages.INPUT_DESCRIPTOR_ID_MATCHES_MDOC_DOCTYPE_DIDNT_PASS),
+              );
+            }
+
+            if (_inputDescriptor.constraints?.fields?.some((field) => field.filter !== undefined)) {
+              this.getResults().push(
+                this.generateErrorResult(index, `$[${vcIndex}]`, wvc, "Fields cannot have a 'filter' defined for mdoc credentials (ISO 18013-7)."),
+              );
+            }
+
+            if (_inputDescriptor.constraints?.fields?.some((field: FieldV2) => field.intent_to_retain === undefined)) {
+              this.getResults().push(
+                this.generateErrorResult(
+                  index,
+                  `$[${vcIndex}]`,
+                  wvc,
+                  "Fields must have 'intent_to_retain' defined for mdoc credentials (ISO 18013-7).",
+                ),
+              );
+            }
           }
 
           this.getResults().push(
@@ -46,25 +69,12 @@ export class FormatRestrictionEvaluationHandler extends AbstractEvaluationHandle
     this.updatePresentationSubmission(pd);
   }
 
-  private generateInputDescriptorIdDoctypeErrorResult(idIdx: number, vcPath: string, wvc: WrappedVerifiableCredential): HandlerCheckResult {
+  private generateErrorResult(idIdx: number, vcPath: string, wvc: WrappedVerifiableCredential, message?: string): HandlerCheckResult {
     return {
       input_descriptor_path: `$.input_descriptors[${idIdx}]`,
       evaluator: this.getName(),
       status: Status.ERROR,
-      message: PexMessages.INPUT_DESCRIPTOR_ID_MATCHES_MDOC_DOCTYPE_DIDNT_PASS,
-      verifiable_credential_path: vcPath,
-      payload: {
-        format: wvc.format,
-      },
-    };
-  }
-
-  private generateErrorResult(idIdx: number, vcPath: string, wvc: WrappedVerifiableCredential): HandlerCheckResult {
-    return {
-      input_descriptor_path: `$.input_descriptors[${idIdx}]`,
-      evaluator: this.getName(),
-      status: Status.ERROR,
-      message: PexMessages.FORMAT_RESTRICTION_DIDNT_PASS,
+      message: message ?? PexMessages.FORMAT_RESTRICTION_DIDNT_PASS,
       verifiable_credential_path: vcPath,
       payload: {
         format: wvc.format,

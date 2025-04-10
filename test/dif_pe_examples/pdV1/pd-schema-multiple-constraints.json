@@ -16,37 +16,10 @@
           "limit_disclosure": "required",
           "fields": [
             {
-              "path": [
-                "$.credentialSubject.age",
-                "$.credentialSubject.details.age"
-              ],
+              "path": ["$.credentialSubject.age", "$.credentialSubject.details.age"],
               "filter": {
                 "type": "integer",
                 "minimum": 18
-              },
-              "predicate": "required"
-            }, {
-              "path": [
-                "$.credentialSubject.citizenship[*]",
-                "$.credentialSubject.details.citizenship[*]"
-              ],
-              "filter": {
-                "type": "string",
-                "enum": [
-                  "eu",
-                  "us",
-                  "uk"
-                ]
-              },
-              "predicate": "required"
-            }, {
-              "path": [
-                "$.credentialSubject.country[*].abbr",
-                "$.credentialSubject.details.country[*].abbr"
-              ],
-              "filter": {
-                "type": "string",
-                "pattern": "NLD"
               },
               "predicate": "required"
             }
