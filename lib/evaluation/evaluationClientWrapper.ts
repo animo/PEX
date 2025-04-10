@@ -454,7 +454,6 @@ export class EvaluationClientWrapper {
       value: string | IVerifiablePresentation[] | IVerifiableCredential;
     }>;
 
-    console.log(wvp.decoded, descriptor.path);
     if (!vcResult) {
       return {
         error: {
