@@ -1,8 +1,7 @@
-import { CredentialMapper, WrappedVerifiableCredential } from '@sphereon/ssi-types';
-
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV1, InternalPresentationDefinitionV2 } from '../../types';
 import PexMessages from '../../types/Messages';
+import { PexCredentialMapper, WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { isRestrictedDID } from '../../utils';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
@@ -39,13 +38,13 @@ export class DIDRestrictionEvaluationHandler extends AbstractEvaluationHandler {
   }
 
   private getIssuerIdFromWrappedVerifiableCredential(wrappedVc: WrappedVerifiableCredential) {
-    if (CredentialMapper.isW3cCredential(wrappedVc.credential)) {
+    if (PexCredentialMapper.isW3cCredential(wrappedVc.credential)) {
       return typeof wrappedVc.credential.issuer === 'object' ? wrappedVc.credential.issuer.id : wrappedVc.credential.issuer;
-    } else if (CredentialMapper.isSdJwtDecodedCredential(wrappedVc.credential)) {
+    } else if (PexCredentialMapper.isSdJwtDecodedCredential(wrappedVc.credential)) {
       return wrappedVc.credential.decodedPayload.iss;
     }
     // mdoc is not bound to did
-    else if (CredentialMapper.isWrappedMdocCredential(wrappedVc)) {
+    else if (PexCredentialMapper.isWrappedMdocCredential(wrappedVc)) {
       return undefined;
     }
     throw new Error('Unsupported credential type');

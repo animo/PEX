@@ -1,9 +1,10 @@
 import { ConstraintsV1, ConstraintsV2, Optionality } from '@sphereon/pex-models';
-import { CredentialMapper, IVerifiableCredential, SdJwtDecodedVerifiableCredential, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { IVerifiableCredential, SdJwtDecodedVerifiableCredential } from '@sphereon/ssi-types';
 
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV2, PathComponent } from '../../types';
 import PexMessages from '../../types/Messages';
+import { PexCredentialMapper, WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { getIssuerString, getSubjectIdsAsString, JsonPathUtils } from '../../utils';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
@@ -46,11 +47,11 @@ export class SubjectIsIssuerEvaluationHandler extends AbstractEvaluationHandler 
           const issuer = getIssuerString(mapping.value);
           if (mapping && mapping.value && getSubjectIdsAsString(mapping.value).every((item) => item === issuer)) {
             this.getResults().push(
-              this.generateSuccessResult(idIdx, currentDescriptor.path, CredentialMapper.toWrappedVerifiableCredential(mapping.value)),
+              this.generateSuccessResult(idIdx, currentDescriptor.path, PexCredentialMapper.toWrappedVerifiableCredential(mapping.value)),
             );
           } else {
             this.getResults().push(
-              this.generateErrorResult(idIdx, currentDescriptor.path, CredentialMapper.toWrappedVerifiableCredential(mapping.value)),
+              this.generateErrorResult(idIdx, currentDescriptor.path, PexCredentialMapper.toWrappedVerifiableCredential(mapping.value)),
             );
           }
         }

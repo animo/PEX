@@ -1,11 +1,12 @@
 import fs from 'fs';
 
 import { PresentationSubmission } from '@sphereon/pex-models';
-import { IVerifiablePresentation, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { IVerifiablePresentation } from '@sphereon/ssi-types';
 
 import { IPresentationDefinition, PEX } from '../../lib';
 import { EvaluationClientWrapper } from '../../lib/evaluation';
 import { InternalPresentationDefinitionV1 } from '../../lib/types/Internal.types';
+import { WrappedVerifiableCredential } from '../../lib/types/PexCredentialMapper';
 import { SSITypesBuilder } from '../../lib/types/SSITypesBuilder';
 
 function getFile(path: string) {

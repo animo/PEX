@@ -93,7 +93,7 @@ describe('evaluate mdoc', () => {
     expect(result.areRequiredCredentialsPresent).toBe('info');
   });
 
-  it.only('selectFrom with mso_mdoc format where input descriptor id does not match doctype', () => {
+  it('selectFrom with mso_mdoc format where input descriptor id does not match doctype', () => {
     const pd = getPresentationDefinitionV2();
     pd.input_descriptors[0].id = 'random';
     const result = pex.selectFrom(pd, [mdocBase64UrlUniversity]);

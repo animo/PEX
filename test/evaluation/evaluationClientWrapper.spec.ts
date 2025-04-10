@@ -7,7 +7,6 @@ import {
   ICredentialSubject,
   IVerifiableCredential,
   IVerifiablePresentation,
-  WrappedVerifiableCredential,
   WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types';
 
@@ -15,6 +14,7 @@ import { Status } from '../../lib';
 import { EvaluationClient, EvaluationClientWrapper } from '../../lib/evaluation';
 import { InternalPresentationDefinitionV1, InternalPresentationDefinitionV2 } from '../../lib/types';
 import { SSITypesBuilder } from '../../lib/types';
+import { WrappedVerifiableCredential } from '../../lib/types/PexCredentialMapper';
 
 import { EvaluationClientWrapperData } from './EvaluationClientWrapperData';
 

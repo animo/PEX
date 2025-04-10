@@ -45,6 +45,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@animo-id/mdoc": "^0.5.2",
     "@astronautlabs/jsonpath": "^1.1.2",
     "@sd-jwt/decode": "^0.7.2",
     "@sd-jwt/present": "^0.7.2",
@@ -54,15 +55,15 @@
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "jwt-decode": "^3.1.2",
-    "uint8arrays": "^3.1.1",
-    "nanoid": "^3.3.7"
+    "nanoid": "^3.3.7",
+    "uint8arrays": "^3.1.1"
   },
   "devDependencies": {
+    "@sd-jwt/core": "^0.7.2",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.19.26",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
-    "@sd-jwt/core": "^0.7.2",
     "ajv-cli": "^5.0.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -72,12 +73,12 @@
     "npm-run-all": "^4.1.5",
     "open-cli": "^8.0.0",
     "prettier": "^3.2.5",
+    "release-it": "^17.4.1",
     "rimraf": "^5.0.5",
     "ts-jest": "^29.1.2",
     "ts-json-schema-generator": "^1.5.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.2",
-    "release-it": "^17.4.1"
+    "typescript": "^5.4.2"
   },
   "files": [
     "index.ts",
@@ -91,6 +92,11 @@
   "prettier": {
     "singleQuote": true,
     "printWidth": 150
+  },
+  "pnpm": {
+    "overrides": {
+      "@sphereon/kmp-mdoc-core": "0.2.0-SNAPSHOT.27"
+    }
   },
   "packageManager": "pnpm@9.4.0+sha256.b6fd0bfda555e7e584ad7e56b30c68b01d5a04f9ee93989f4b93ca8473c49c74"
 }

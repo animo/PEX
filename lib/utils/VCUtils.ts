@@ -1,6 +1,7 @@
-import { AdditionalClaims, CredentialMapper, ICredential, ICredentialSubject, IIssuer, SdJwtDecodedVerifiableCredential } from '@sphereon/ssi-types';
+import { AdditionalClaims, ICredential, ICredentialSubject, IIssuer, SdJwtDecodedVerifiableCredential } from '@sphereon/ssi-types';
 
 import { DiscoveredVersion, IPresentationDefinition, PEVersion } from '../types';
+import { PexCredentialMapper } from '../types/PexCredentialMapper';
 import validatePDv1 from '../validation/validatePDv1.js';
 import validatePDv2 from '../validation/validatePDv2.js';
 import { ValidationError } from '../validation/validators';
@@ -9,7 +10,7 @@ import { ObjectUtils } from './ObjectUtils';
 import { JsonPathUtils } from './jsonPathUtils';
 
 export function getSubjectIdsAsString(vc: ICredential | SdJwtDecodedVerifiableCredential): string[] {
-  if (CredentialMapper.isSdJwtDecodedCredential(vc)) {
+  if (PexCredentialMapper.isSdJwtDecodedCredential(vc)) {
     // TODO: should we also handle `cnf` claim?
     return vc.signedPayload.sub ? [vc.signedPayload.sub] : [];
   }
@@ -19,7 +20,7 @@ export function getSubjectIdsAsString(vc: ICredential | SdJwtDecodedVerifiableCr
 }
 
 export function getIssuerString(vc: ICredential | SdJwtDecodedVerifiableCredential): string {
-  if (CredentialMapper.isSdJwtDecodedCredential(vc)) {
+  if (PexCredentialMapper.isSdJwtDecodedCredential(vc)) {
     return vc.signedPayload.iss;
   }
 

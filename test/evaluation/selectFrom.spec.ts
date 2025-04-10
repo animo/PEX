@@ -1,13 +1,14 @@
 import fs from 'fs';
 
 import { SDJwt } from '@sd-jwt/core';
-import { defaultHasher, IVerifiableCredential, WrappedVerifiableCredential } from '@sphereon/ssi-types';
+import { defaultHasher, IVerifiableCredential } from '@sphereon/ssi-types';
 
 import { PEX, Status } from '../../lib';
 import { EvaluationClientWrapper } from '../../lib/evaluation';
 import { SubmissionRequirementMatchType } from '../../lib/evaluation/core';
 import { InternalPresentationDefinitionV1, InternalPresentationDefinitionV2, SSITypesBuilder } from '../../lib/types';
 import PexMessages from '../../lib/types/Messages';
+import { WrappedVerifiableCredential } from '../../lib/types/PexCredentialMapper';
 import { ClaimValue } from '../types';
 
 function getFile(path: string) {

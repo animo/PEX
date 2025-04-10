@@ -8,8 +8,6 @@ import {
   IProofType,
   IVerifiableCredential,
   IVerifiablePresentation,
-  OriginalVerifiableCredential,
-  WrappedVerifiablePresentation,
   WrappedW3CVerifiableCredential,
 } from '@sphereon/ssi-types';
 
@@ -17,6 +15,7 @@ import { IPresentationDefinition, PEX, PEXv2, Status, Validated } from '../lib';
 import { PresentationEvaluationResults } from '../lib/evaluation/core';
 import { PresentationSubmissionLocation, VerifiablePresentationResult } from '../lib/signing/types';
 import { SSITypesBuilder } from '../lib/types';
+import { OriginalVerifiableCredential } from '../lib/types/PexCredentialMapper';
 
 import {
   assertedMockCallback,
@@ -1380,7 +1379,7 @@ describe('evaluate', () => {
       ],
     };
     const jwtEncodedVp = getFile('./test/dif_pe_examples/vp/vp_universityDegree.jwt');
-    const wvp: WrappedVerifiablePresentation = SSITypesBuilder.mapExternalVerifiablePresentationToWrappedVP(jwtEncodedVp);
+    const wvp = SSITypesBuilder.mapExternalVerifiablePresentationToWrappedVP(jwtEncodedVp);
     const pex: PEX = new PEX();
     const vpr = await pex.verifiablePresentationFrom(pdSchema, [wvp.vcs[0].original], getAsyncCallbackWithoutProofType, {
       proofOptions: getProofOptionsMock(),

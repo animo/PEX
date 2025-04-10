@@ -1,20 +1,15 @@
 import { Format, PresentationDefinitionV1, PresentationDefinitionV2, PresentationSubmission } from '@sphereon/pex-models';
 import {
   CompactSdJwtVc,
-  CredentialMapper,
   Hasher,
   ICredential,
   IPresentation,
   IProof,
   JwtDecodedVerifiableCredential,
-  OriginalVerifiableCredential,
-  OriginalVerifiablePresentation,
   OrPromise,
   SdJwtDecodedVerifiableCredential,
   W3CVerifiableCredential,
   W3CVerifiablePresentation,
-  WrappedVerifiableCredential,
-  WrappedVerifiablePresentation,
 } from '@sphereon/ssi-types';
 
 import { Status } from './ConstraintUtils';
@@ -30,6 +25,13 @@ import {
   VerifiablePresentationResult,
 } from './signing';
 import { DiscoveredVersion, IInternalPresentationDefinition, IPresentationDefinition, OrArray, PEVersion, SSITypesBuilder } from './types';
+import {
+  OriginalVerifiableCredential,
+  OriginalVerifiablePresentation,
+  PexCredentialMapper,
+  WrappedVerifiableCredential,
+  WrappedVerifiablePresentation,
+} from './types/PexCredentialMapper';
 import { calculateSdHash, definitionVersionDiscovery, formatValidationErrors, getSubjectIdsAsString } from './utils';
 import { PresentationDefinitionV1VB, PresentationDefinitionV2VB, PresentationSubmissionVB, Validated, ValidationEngine } from './validation';
 
@@ -38,7 +40,7 @@ export interface PEXOptions {
    * Hasher implementation, can be used for tasks such as decoding a compact SD-JWT VC to it's encoded variant.
    * When decoding SD-JWT credentials the hasher must be provided. The hasher implementation must be sync. When using
    * an async hasher implementation, you must manually decode the credential or presentation first according to the
-   * `SdJwtDecodedVerifiableCredential` interface. You can use the `CredentialMapper.decodeSdJwtAsync` method for
+   * `SdJwtDecodedVerifiableCredential` interface. You can use the `PexCredentialMapper.decodeSdJwtAsync` method for
    *  this from the `@sphereon/ssi-types` package. NOTE that this is only needed when using an async hasher, and
    * that for sync hashers providing it here is enough for the decoding to be done automatically.
    */
@@ -106,7 +108,7 @@ export class PEX {
     let presentationSubmission = opts?.presentationSubmission;
     let presentationSubmissionLocation =
       opts?.presentationSubmissionLocation ??
-      ((Array.isArray(presentations) && presentations.length > 1) || !CredentialMapper.isW3cPresentation(wrappedPresentations[0].presentation)
+      ((Array.isArray(presentations) && presentations.length > 1) || !PexCredentialMapper.isW3cPresentation(wrappedPresentations[0].presentation)
         ? PresentationSubmissionLocation.EXTERNAL
         : PresentationSubmissionLocation.PRESENTATION);
 
@@ -114,7 +116,7 @@ export class PEX {
     if (
       !presentationSubmission &&
       presentationsArray.length === 1 &&
-      CredentialMapper.isW3cPresentation(wrappedPresentations[0].presentation) &&
+      PexCredentialMapper.isW3cPresentation(wrappedPresentations[0].presentation) &&
       !generatePresentationSubmission
     ) {
       const decoded = wrappedPresentations[0].decoded;
@@ -138,7 +140,7 @@ export class PEX {
     // `wrappedPresentation.original.compactKbJwt`, but as HAIP doesn't use dids, we'll leave it for now.
     const holderDIDs = wrappedPresentations
       .map((p) => {
-        return CredentialMapper.isW3cPresentation(p.presentation) && p.presentation.holder ? p.presentation.holder : undefined;
+        return PexCredentialMapper.isW3cPresentation(p.presentation) && p.presentation.holder ? p.presentation.holder : undefined;
       })
       .filter((d): d is string => d !== undefined);
 
@@ -269,7 +271,9 @@ export class PEX {
     opts?: PresentationFromOpts,
   ): PresentationResult {
     const presentationSubmission = this.presentationSubmissionFrom(presentationDefinition, selectedCredentials, opts);
-    const hasSdJwtCredentials = selectedCredentials.some((c) => CredentialMapper.isSdJwtDecodedCredential(c) || CredentialMapper.isSdJwtEncoded(c));
+    const hasSdJwtCredentials = selectedCredentials.some(
+      (c) => PexCredentialMapper.isSdJwtDecodedCredential(c) || PexCredentialMapper.isSdJwtEncoded(c),
+    );
 
     // We could include it in the KB-JWT? Not sure if we want that
     if (opts?.presentationSubmissionLocation === PresentationSubmissionLocation.PRESENTATION && hasSdJwtCredentials) {
@@ -310,7 +314,7 @@ export class PEX {
     }
     const verifiableCredential = (Array.isArray(selectedCredentials) ? selectedCredentials : [selectedCredentials]) as W3CVerifiableCredential[];
 
-    const wVCs = verifiableCredential.map((vc) => CredentialMapper.toWrappedVerifiableCredential(vc));
+    const wVCs = verifiableCredential.map((vc) => PexCredentialMapper.toWrappedVerifiableCredential(vc));
     const holders = Array.from(new Set(wVCs.flatMap((wvc) => getSubjectIdsAsString(wvc.credential as ICredential))));
     const holder = opts?.holderDID ?? (holders.length === 1 ? holders[0] : undefined);
 
@@ -352,10 +356,10 @@ export class PEX {
       });
     } else {
       verifiableCredential.forEach((vc) => {
-        if (CredentialMapper.isSdJwtDecodedCredential(vc)) {
+        if (PexCredentialMapper.isSdJwtDecodedCredential(vc)) {
           result.push(vc as PartialSdJwtDecodedVerifiableCredential);
-        } else if (CredentialMapper.isSdJwtEncoded(vc)) {
-          const decoded = CredentialMapper.decodeVerifiableCredential(vc);
+        } else if (PexCredentialMapper.isSdJwtEncoded(vc)) {
+          const decoded = PexCredentialMapper.decodeVerifiableCredential(vc);
           result.push(decoded as PartialSdJwtDecodedVerifiableCredential);
         } else {
           // This should be jwt or json-ld
@@ -377,15 +381,15 @@ export class PEX {
     TODO SDK-37 refinement needed
    */
   private static allowMultipleVCsPerPresentation(verifiableCredentials: Array<OriginalVerifiableCredential>): boolean {
-    const jwtCredentials = verifiableCredentials.filter((c) => CredentialMapper.isJwtEncoded(c) || CredentialMapper.isJwtDecodedCredential(c));
+    const jwtCredentials = verifiableCredentials.filter((c) => PexCredentialMapper.isJwtEncoded(c) || PexCredentialMapper.isJwtDecodedCredential(c));
 
     if (jwtCredentials.length > 0) {
       const subjects = new Set<string>();
       const verificationMethods = new Set<string>();
 
       for (const credential of jwtCredentials) {
-        const decodedCredential = CredentialMapper.isJwtEncoded(credential)
-          ? (CredentialMapper.decodeVerifiableCredential(credential) as JwtDecodedVerifiableCredential)
+        const decodedCredential = PexCredentialMapper.isJwtEncoded(credential)
+          ? (PexCredentialMapper.decodeVerifiableCredential(credential) as JwtDecodedVerifiableCredential)
           : (credential as JwtDecodedVerifiableCredential);
 
         const subject =
@@ -406,7 +410,7 @@ export class PEX {
       }
     }
 
-    if (verifiableCredentials.some((c) => CredentialMapper.isSdJwtEncoded(c) || CredentialMapper.isSdJwtDecodedCredential(c))) {
+    if (verifiableCredentials.some((c) => PexCredentialMapper.isSdJwtEncoded(c) || PexCredentialMapper.isSdJwtDecodedCredential(c))) {
       return false;
     }
 
@@ -568,7 +572,7 @@ export class PEX {
   ) {
     presentations.forEach((presentation, index) => {
       // Select type without kbJwt as isSdJwtDecodedCredential and won't accept the partial sdvc type
-      if (CredentialMapper.isSdJwtDecodedCredential(presentation as SdJwtDecodedVerifiableCredential)) {
+      if (PexCredentialMapper.isSdJwtDecodedCredential(presentation as SdJwtDecodedVerifiableCredential)) {
         const sdJwtCredential = presentation as SdJwtDecodedVerifiableCredential;
 
         // extract sd_alg or default to sha-256

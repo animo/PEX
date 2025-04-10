@@ -1,12 +1,12 @@
 import { JSONPath as jp } from '@astronautlabs/jsonpath';
 import { FieldV1, FieldV2 } from '@sphereon/pex-models';
-import { WrappedVerifiableCredential } from '@sphereon/ssi-types';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
 import { Status } from '../../ConstraintUtils';
 import { IInternalPresentationDefinition, InternalPresentationDefinitionV2, PathComponent } from '../../types';
 import PexMessages from '../../types/Messages';
+import { WrappedVerifiableCredential } from '../../types/PexCredentialMapper';
 import { JsonPathUtils } from '../../utils';
 import { HandlerCheckResult } from '../core';
 import { EvaluationClient } from '../evaluationClient';
