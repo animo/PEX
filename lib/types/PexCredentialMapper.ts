@@ -19,6 +19,7 @@ import {
   WrappedW3CVerifiableCredential,
   WrappedW3CVerifiablePresentation,
 } from '@sphereon/ssi-types';
+import * as u8a from 'uint8arrays';
 
 export interface WrappedMdocCredential {
   /**
@@ -286,19 +287,5 @@ function encodeMdocValue(value: unknown) {
 }
 
 function convertBase64urlToBinary(data: string) {
-  // Replace base64url characters back to base64
-  const base64 = data.replace(/-/g, '+').replace(/_/g, '/');
-
-  // Add padding if needed
-  const paddedBase64 = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
-
-  // Decode base64 to binary
-  const raw = atob(paddedBase64);
-  const rawLength = raw.length;
-  const array = new Uint8Array(new ArrayBuffer(rawLength));
-
-  for (let i = 0; i < rawLength; i++) {
-    array[i] = raw.charCodeAt(i);
-  }
-  return array;
+  return u8a.fromString(data, 'base64url');
 }
