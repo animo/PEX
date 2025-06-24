@@ -95,6 +95,8 @@
       "issuanceDate": "2010-01-01T19:73:24Z",
       "credentialSubject": {
         "id": "did:example:ebfeb1f712ebc6f1c276e12ec21",
+        "familyName": "something",
+        "givenName": "something",
         "license": {
           "number": "34DGE352",
           "dob": "07/13/80"

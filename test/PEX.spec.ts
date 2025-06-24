@@ -1172,7 +1172,7 @@ describe('evaluate', () => {
     expect(evalResult.errors).toEqual([
       {
         message:
-          "Extraction of path $ for submission.descriptor_map[0] returned multiple entires. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.",
+          "Extraction of path $ for submission.descriptor_map[0] returned multiple entries. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.",
         status: 'error',
         tag: 'SubmissionPathMultipleEntries',
       },

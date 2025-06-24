@@ -15,9 +15,6 @@
         "schema": [
           {
             "uri": "https://www.w3.org/2018/credentials/v1"
-          },
-          {
-            "uri": "https://w3id.org/citizenship/v1"
           }
         ],
         "group": [
@@ -46,8 +43,7 @@
                 "$.credentialSubject.givenName"
               ]
             }
-          ],
-          "limit_disclosure": "required"
+          ]
         },
         "id": "citizenship_input_1",
         "name": "EU Driver's License"

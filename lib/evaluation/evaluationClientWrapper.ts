@@ -591,7 +591,7 @@ export class EvaluationClientWrapper {
           result.errors?.push({
             status: Status.ERROR,
             tag: 'SubmissionPathMultipleEntries',
-            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] returned multiple entires. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.`,
+            message: `Extraction of path ${descriptor.path} for submission.descriptor_map[${descriptorIndex}] returned multiple entries. This is probably because the submission uses '$' to reference the presentation, while an array was used (thus all presentations are selected). Make sure the submission uses the correct path.`,
           });
           continue;
         }

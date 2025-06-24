@@ -154,6 +154,6 @@ describe('evaluate', () => {
         proofOptions: getProofOptionsMock(),
         signatureOptions: getSingatureOptionsMock(),
       }),
-    ).rejects.toThrow(Error);
+    ).rejects.toThrow('Could not sign because of missing fields');
   });
 });

@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 import { FilterV2, PresentationDefinitionV2 } from '@sphereon/pex-models';
-import { IProofType, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types';
+import { IProofPurpose, IProofType, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types';
 
 import { PEX, PEXv2, SelectResults, Status, Validated } from '../lib';
 
@@ -663,7 +663,11 @@ describe('evaluate', () => {
     expect(selectResults.areRequiredCredentialsPresent).toEqual(Status.INFO);
 
     const vpr = await pex.verifiablePresentationFrom(pdSchema, [identityCredential], assertedMockCallback, {
-      proofOptions: getProofOptionsMock(),
+      proofOptions: {
+        type: 'DataIntegrityProof.anoncredsvc-2023',
+        proofPurpose: IProofPurpose.authentication,
+        typeSupportsSelectiveDisclosure: true,
+      },
       signatureOptions: getSingatureOptionsMock(),
     });
     expect(vpr.presentationSubmission.descriptor_map).toHaveLength(1);

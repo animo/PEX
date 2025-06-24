@@ -57,8 +57,9 @@ export async function getAsyncCallbackWithoutProofType(callbackParams: Presentat
 
 export function getProofOptionsMock(): ProofOptions {
   return {
-    type: IProofType.EcdsaSecp256k1Signature2019,
+    type: IProofType.BbsBlsSignatureProof2020,
     proofPurpose: IProofPurpose.authentication,
+    typeSupportsSelectiveDisclosure: true,
   };
 }
 

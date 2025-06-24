@@ -529,6 +529,10 @@ export class PEX {
       limitDisclosureSignatureSuites,
     });
 
+    if (evaluationResult.areRequiredCredentialsPresent === Status.ERROR) {
+      throw new Error('Could not create presentation, selected credentials do not satisfy the presentation definition');
+    }
+
     const presentationResult = this.presentationFrom(presentationDefinition, evaluationResult.verifiableCredential, opts);
     const presentations = presentationResult.presentations;
     const evaluationResults = this.evaluatePresentation(presentationDefinition, presentations, {

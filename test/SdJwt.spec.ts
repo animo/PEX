@@ -376,6 +376,52 @@ describe('evaluate', () => {
     });
   });
 
+  it('verifiablePresentationFrom throws error if the selectedCredentials do not satisfy the presentation definition', async () => {
+    const pd = {
+      id: 'id',
+      purpose: 'purpose',
+      input_descriptors: [
+        {
+          id: 'descriptor',
+          constraints: {
+            limit_disclosure: 'preferred',
+            fields: [
+              {
+                path: ['$.iss'],
+                filter: {
+                  type: 'string',
+                  enum: ['did:web:127.0.0.1:9000:paradym-public-metadata:random'],
+                },
+              },
+              {
+                path: ['$.vct'],
+                filter: {
+                  type: 'string',
+                  const: 'test-vct',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } satisfies PresentationDefinitionV2;
+    await expect(
+      pex.verifiablePresentationFrom(
+        pd,
+        [
+          'eyJ0eXAiOiJ2YytzZC1qd3QiLCJhbGciOiJFZERTQSIsImtpZCI6IiN6Nk1rZmhyQ2QxZmJoSmRlTEh2aTFYblpWUTlaNnBVSmFXbXdmVVNtQUxvMnc0OHcifQ.eyJ0ZXN0RmllbGQiOiJ0ZXN0VmFsdWUiLCJ2Y3QiOiJ0ZXN0LXZjdCIsImNuZiI6eyJraWQiOiJkaWQ6a2V5Ono2TWtlcHY0VXNQalBCNHFxS2Jpc3ZEUTlYdFkzVEIzQ1JiTm9QOXc3bTlSR0o2ZCN6Nk1rZXB2NFVzUGpQQjRxcUtiaXN2RFE5WHRZM1RCM0NSYk5vUDl3N205UkdKNmQifSwiaXNzIjoiZGlkOndlYjoxMjcuMC4wLjE6OTAwMDpwYXJhZHltLXB1YmxpYy1tZXRhZGF0YToyNzMxZWRjMC0yN2JiLTQ1MmYtYWIxZS1kM2I3M2I3YWFkYWMiLCJpYXQiOjE3MjY2NDk1OTEsIl9zZCI6WyI4bmhDRXVHVVNfSlpZY1hPMGY1Yzg4Q0lQdFluWm5vWVlYWVRkQjZGd05JIiwiRURqM1JoU3B0TlNIbEp5ZHJWRDZJeEt0ZG9iMHdUVzRiMnd6UjBjVUlkWSIsImpHSDJFYXl1cmw0bTFTOXNUSFdpWkVRYXpLT01jU1hlN2RtRlBqSnlibFUiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.F51KfZ6knRgxltGTNyISwyb2vXjV3x90Fp_UV4cJNfg9sDVrASs07f_hv1kbBjQhEEyJIw5rFwyXa958AjnTDA~WyIyMzM1OTg3ODE3ODk3NDAxNzM2NDAwMDEiLCJhbm90aGVyRmllbGQiLCJhbm90aGVyVmFsdWUiXQ~WyI5MDIzNDA0MDI3NzI4OTU2OTg2NzQ5MDMiLCJjb21wbGlhbnQiLGZhbHNlXQ~WyI1MzYzNjM5MzQ2MDc1MzcyODgzNzU0OSIsIm5vbkNvbXBsaWFudCIsdHJ1ZV0~',
+        ],
+        async (options) => {
+          const sdJwtCredential = options.presentation as SdJwtDecodedVerifiableCredential;
+          return sdJwtCredential.compactSdJwtVc;
+        },
+        {
+          presentationSubmissionLocation: PresentationSubmissionLocation.EXTERNAL,
+        },
+      ),
+    ).rejects.toThrow('Could not create presentation, selected credentials do not satisfy the presentation definition');
+  });
+
   it('select where only one of requested credentials is present', async () => {
     const presentationDefinition = getPresentationDefinitionV2PidAndMdl();
     const selectResults = pex.selectFrom(presentationDefinition, [pidSdJwt]);
